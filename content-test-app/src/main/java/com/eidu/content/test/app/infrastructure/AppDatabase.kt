@@ -6,6 +6,6 @@ import com.eidu.content.test.app.model.ContentApp
 import com.eidu.content.test.app.model.persistence.ContentAppDao
 
 @Database(entities = [ContentApp::class], version = 1)
-abstract class AppDatabase: RoomDatabase() {
+abstract class AppDatabase : RoomDatabase() {
     abstract fun contentAppDao(): ContentAppDao
 }

@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.eidu.content.launch.LaunchData
 import com.eidu.content.result.LaunchResultData
 import com.eidu.content.sample.app.EIDUContentTestAppTheme
-import com.eidu.content.sample.app.ui.shared.EiduScaffold
+import com.eidu.content.sample.app.shared.EiduScaffold
 import java.util.Timer
 import java.util.TimerTask
 

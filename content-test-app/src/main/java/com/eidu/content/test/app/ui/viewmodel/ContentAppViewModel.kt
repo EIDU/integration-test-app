@@ -89,7 +89,7 @@ class ContentAppViewModel @Inject constructor(
                     _contentAppResult.postValue(
                         Result.Error(
                             "There was an error parsing the result intent: ${e.localizedMessage}." +
-                                    "The resulting intent was: $resultIntent"
+                                "The resulting intent was: $resultIntent"
                         )
                     )
                 }
@@ -127,7 +127,7 @@ class ContentAppViewModel @Inject constructor(
                     } catch (e: IllegalArgumentException) {
                         Result.Error(
                             "There was an error parsing the result intent: ${e.localizedMessage}." +
-                                    "The resulting intent was: $resultIntent"
+                                "The resulting intent was: $resultIntent"
                         )
                     }
                 }
@@ -161,8 +161,8 @@ class ContentAppViewModel @Inject constructor(
             _contentAppResult.postValue(
                 Result.Error(
                     "Unable to launch content unit ${contentUnit.unitId} because the activity" +
-                            " ${contentApp.packageName}/${contentApp.launchClass} could not be found. " +
-                            "Have you declared it in your AndroidManifest.xml file?"
+                        " ${contentApp.packageName}/${contentApp.launchClass} could not be found. " +
+                        "Have you declared it in your AndroidManifest.xml file?"
                 )
             )
         }
@@ -182,8 +182,8 @@ class ContentAppViewModel @Inject constructor(
             _contentUnits.postValue(
                 Result.Error(
                     "Could not query for units by intent. Have you" +
-                            "declared an activity filter responding to the '${queryIntent.action}' action " +
-                            "and added the 'DEFAULT' category?"
+                        "declared an activity filter responding to the '${queryIntent.action}' action " +
+                        "and added the 'DEFAULT' category?"
                 )
             )
         }

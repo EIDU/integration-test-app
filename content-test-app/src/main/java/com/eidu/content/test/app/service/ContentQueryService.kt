@@ -22,7 +22,7 @@ class ContentQueryService @Inject constructor() {
         Log.i(
             "ContentQueryService",
             "queryContentProvider: Calling content provider of app ${contentApp.packageName}" +
-                    " version $contentAppVersion with URI $contentProviderUri"
+                " version $contentAppVersion with URI $contentProviderUri"
         )
 
         return context.contentResolver.query(

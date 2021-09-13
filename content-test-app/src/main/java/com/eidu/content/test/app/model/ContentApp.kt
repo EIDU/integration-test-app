@@ -14,10 +14,10 @@ data class ContentApp(
 ) {
     fun isValid(): Boolean =
         name.isNotBlank() &&
-                packageName.isNotBlank() &&
-                launchClass.isNotBlank() &&
-                queryAction.isNotBlank() &&
-                contentProvider.isNotBlank()
+            packageName.isNotBlank() &&
+            launchClass.isNotBlank() &&
+            queryAction.isNotBlank() &&
+            contentProvider.isNotBlank()
 
     companion object {
         fun empty(): ContentApp = ContentApp(
