@@ -29,7 +29,7 @@ jobs:
         run: git fetch --tags -f
 
       - name: Lint and test
-        run: ./gradlew ktlintCheck ktlintTestSourceSetCheck ktlintAndroidTestSourceSetCheck lintCi testCiUnitTest --stacktrace
+        run: ./gradlew ktlintCheck ktlintTestSourceSetCheck ktlintAndroidTestSourceSetCheck lintRelease testReleaseUnitTest --stacktrace
 
       - name: Publish test reports
         uses: actions/upload-artifact@v1
@@ -39,7 +39,7 @@ jobs:
         if: ${{ failure() }}
 
       - name: Build APKs
-        run: ./gradlew assembleCi --stacktrace
+        run: ./gradlew assembleRelease --stacktrace
 
       - name: Upload App APKs to S3
         run: |
