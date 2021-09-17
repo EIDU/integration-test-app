@@ -1,8 +1,12 @@
 package com.eidu.content.test.app.ui.viewmodel
 
 import android.app.Activity
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import android.util.Log
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -16,7 +20,6 @@ import com.eidu.content.result.LaunchResultData
 import com.eidu.content.test.app.model.ContentApp
 import com.eidu.content.test.app.model.ContentUnit
 import com.eidu.content.test.app.model.persistence.ContentAppDao
-import com.eidu.content.test.app.service.ContentQueryService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,8 +27,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ContentAppViewModel @Inject constructor(
-    private val contentAppDao: ContentAppDao,
-    private val contentQueryService: ContentQueryService
+    private val contentAppDao: ContentAppDao
 ) : ViewModel() {
 
     private val _contentUnits = MutableLiveData<Result<List<ContentUnit>>>(Result.Loading)
@@ -56,16 +58,41 @@ class ContentAppViewModel @Inject constructor(
         return data
     }
 
-    fun queryUnitsByContentProvider(
+    fun loadUnitsFromCSVFile(
         context: Context,
-        contentApp: ContentApp
+        contentApp: ContentApp,
+        clipboardService: ClipboardManager
     ): LiveData<Result<List<ContentUnit>>> {
         _contentUnits.postValue(Result.Loading)
         viewModelScope.launch(Dispatchers.IO) {
-            val queryResult = contentQueryService.queryContentProvider(contentApp, context)
-                ?.let { Result.Success(it) }
-                ?: Result.Error("Could not query content provider because it was not found.")
-            _contentUnits.postValue(queryResult)
+            val contentPackageDir =
+                context.getExternalFilesDir(null)?.resolve(contentApp.packageName)
+            val unitFile = contentPackageDir?.resolve("content-units.csv")
+            val contentAppVersion = getContentAppVersion(context, contentApp)
+            if (unitFile == null) {
+                _contentUnits.postValue(Result.Error("No access to external storage to read unit file.."))
+            } else if (!unitFile.exists()) {
+                clipboardService.setPrimaryClip(ClipData.newPlainText("Unit File", unitFile.path))
+                _contentUnits.postValue(Result.Error("Units file ${unitFile.path} does not exist. " +
+                        "The path was copied to your clipboard so you can push it using 'adb push content-units.csv ${unitFile.path}'"))
+            } else if (contentAppVersion == null) {
+                _contentUnits.postValue(Result.Error("Unable to determine content app version"))
+            } else {
+                val contentUnits = unitFile.readLines()
+                    .mapIndexedNotNull { index, line ->
+                        if (index in (0..1)) null
+                        else {
+                            val (unitId, icon, _) = line.split(";")
+                            ContentUnit(
+                                contentApp,
+                                contentAppVersion,
+                                unitId,
+                                icon
+                            )
+                        }
+                    }
+                _contentUnits.postValue(Result.Success(contentUnits))
+            }
         }
         return _contentUnits
     }
@@ -139,6 +166,21 @@ class ContentAppViewModel @Inject constructor(
     private fun clearContentAppResult() {
         _contentAppResult.postValue(Result.Loading)
     }
+
+    private fun getContentAppVersion(context: Context, contentApp: ContentApp): String? =
+        getContentAppInfo(context, contentApp)?.versionName
+
+    private fun getContentAppInfo(context: Context, contentApp: ContentApp): PackageInfo? =
+        try {
+            context.packageManager.getPackageInfo(contentApp.packageName, 0)
+        } catch (e: PackageManager.NameNotFoundException) {
+            Log.e(
+                "ContentAppViewModel",
+                "getContentAppInfo: unable to query content info for package ${contentApp.packageName}",
+                e
+            )
+            null
+        }
 }
 
 sealed class Result<out T> {

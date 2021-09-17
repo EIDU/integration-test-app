@@ -68,9 +68,10 @@ class MainActivity : ComponentActivity() {
                                     val contentApp = app.result
                                     val unitLoadingState by remember {
                                         contentAppViewModel
-                                            .queryUnitsByContentProvider(
+                                            .loadUnitsFromCSVFile(
                                                 applicationContext,
-                                                contentApp
+                                                contentApp,
+                                                clipboardService
                                             )
                                     }.observeAsState(initial = Result.Loading)
 
