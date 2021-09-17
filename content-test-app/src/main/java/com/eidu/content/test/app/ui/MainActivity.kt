@@ -41,10 +41,6 @@ class MainActivity : ComponentActivity() {
             ActivityResultContracts.StartActivityForResult(),
             ::handleContentAppResult
         )
-        val contentAppQueryLauncher = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult(),
-            ::handleContentAppQueryResult
-        )
         val clipboardService = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
         val copyToClipboardToast = Toast.makeText(this, "Copied to clipboard!", Toast.LENGTH_SHORT)
         setContent {
@@ -88,19 +84,6 @@ class MainActivity : ComponentActivity() {
                                                 unit,
                                                 contentAppLauncher,
                                                 navController
-                                            )
-                                        },
-                                        {
-                                            contentAppViewModel.queryUnitsByContentProvider(
-                                                applicationContext,
-                                                contentApp
-                                            )
-                                        },
-                                        {
-                                            contentAppViewModel.launchContentAppQuery(
-                                                applicationContext,
-                                                contentApp,
-                                                contentAppQueryLauncher
                                             )
                                         },
                                         {
@@ -171,13 +154,6 @@ class MainActivity : ComponentActivity() {
 
     private fun handleContentAppResult(activityResult: ActivityResult) {
         contentAppViewModel.processUnitRunResult(activityResult)
-    }
-
-    private fun handleContentAppQueryResult(activityResult: ActivityResult) {
-        contentAppViewModel.processQueryResult(
-            activityResult,
-            applicationContext
-        )
     }
 
     @Composable

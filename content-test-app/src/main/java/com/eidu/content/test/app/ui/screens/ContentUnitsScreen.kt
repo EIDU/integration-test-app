@@ -37,22 +37,11 @@ fun ContentUnitsScreen(
     contentApp: ContentApp,
     contentUnits: Result<List<ContentUnit>>,
     runUnit: (ContentUnit) -> Unit,
-    requeryByProvider: () -> Unit,
-    requeryByIntent: () -> Unit,
     goToEditScreen: () -> Unit,
     goBack: () -> Unit
 ) {
     EiduScaffold(
         title = { Text(text = "${contentApp.name} Units") },
-        bottomBarActions = {
-            Spacer(Modifier.weight(1f, true))
-            IconButton(onClick = requeryByProvider) {
-                Icon(Icons.Filled.Refresh, contentDescription = "Query By Provider")
-            }
-            IconButton(onClick = requeryByIntent) {
-                Icon(Icons.Filled.ExitToApp, contentDescription = "Query By Intent")
-            }
-        },
         goBack = goBack
     ) {
         when (contentUnits) {
@@ -111,25 +100,25 @@ fun ContentUnitRow(contentUnit: ContentUnit, runUnit: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 private fun ContentUnitListPreview() {
-    ContentUnitsScreen(SAMPLE_APP_1, Result.Success(sampleContentUnits()), {}, {}, {}, {}, {})
+    ContentUnitsScreen(SAMPLE_APP_1, Result.Success(sampleContentUnits()), {}, {}, {})
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun ContentUnitListLoadingPreview() {
-    ContentUnitsScreen(SAMPLE_APP_1, Result.Loading, {}, {}, {}, {}, {})
+    ContentUnitsScreen(SAMPLE_APP_1, Result.Loading, {}, {}, {})
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun ContentUnitListNotFoundPreview() {
-    ContentUnitsScreen(SAMPLE_APP_1, Result.NotFound, {}, {}, {}, {}, {})
+    ContentUnitsScreen(SAMPLE_APP_1, Result.NotFound, {}, {}, {})
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun ContentUnitListErrorPreview() {
-    ContentUnitsScreen(SAMPLE_APP_1, Result.Error("Error"), {}, {}, {}, {}, {})
+    ContentUnitsScreen(SAMPLE_APP_1, Result.Error("Error"), {}, {}, {})
 }
 
 private fun sampleContentUnits(): List<ContentUnit> = (1..20).map {
