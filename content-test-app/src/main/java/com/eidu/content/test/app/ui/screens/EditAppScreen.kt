@@ -1,6 +1,8 @@
 package com.eidu.content.test.app.ui.screens
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
@@ -26,7 +28,10 @@ fun EditAppScreen(
 ) {
     var appState by remember { mutableStateOf(contentApp ?: getDefaultContentApp()) }
     EiduScaffold(
-        title = { Text(text = "Add Content App") },
+        title = {
+            if (contentApp != null) Text("Edit Content App")
+            else Text("Add Content App")
+        },
         goBack = goBack
     ) {
         Column(Modifier.fillMaxWidth()) {
@@ -44,16 +49,6 @@ fun EditAppScreen(
                 value = appState.launchClass,
                 onValueChange = { appState = appState.copy(launchClass = it) },
                 label = { Text("Unit launch activity class") },
-            )
-            ContentAppTextField(
-                value = appState.contentProvider,
-                onValueChange = { appState = appState.copy(contentProvider = it) },
-                label = { Text("Unit content provider URI") },
-            )
-            ContentAppTextField(
-                value = appState.queryAction,
-                onValueChange = { appState = appState.copy(queryAction = it) },
-                label = { Text("Unit query activity action") },
             )
             Button(
                 onClick = {
@@ -88,7 +83,7 @@ private fun ContentAppTextField(
     )
 }
 
-private fun getDefaultContentApp() = ContentApp.empty().copy(contentProvider = "content://")
+private fun getDefaultContentApp() = ContentApp.empty()
 
 @Composable
 @Preview
