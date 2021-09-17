@@ -13,9 +13,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.ListItem
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -24,7 +22,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.eidu.content.test.app.model.ContentApp
 import com.eidu.content.test.app.model.ContentUnit
-import com.eidu.content.test.app.model.QuerySource
 import com.eidu.content.test.app.ui.shared.ContentAppErrorDisplay
 import com.eidu.content.test.app.ui.shared.EiduScaffold
 import com.eidu.content.test.app.ui.shared.LoadingIndicator
@@ -86,9 +83,6 @@ fun ContentUnitRow(contentUnit: ContentUnit, runUnit: () -> Unit) {
                 Text(contentUnit.contentAppVersion)
             }
         },
-        overlineText = {
-            Text("Source: ${contentUnit.querySource.name}")
-        },
         trailing = {
             IconButton(onClick = runUnit) {
                 Icon(Icons.Filled.PlayArrow, "Start Unit")
@@ -122,5 +116,5 @@ private fun ContentUnitListErrorPreview() {
 }
 
 private fun sampleContentUnits(): List<ContentUnit> = (1..20).map {
-    ContentUnit(SAMPLE_APP_1, "1.7.23", "Content-Unit-$it", QuerySource.ContentProvider)
+    ContentUnit(SAMPLE_APP_1, "1.7.23", "Content-Unit-$it", "sample.png")
 }

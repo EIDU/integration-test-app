@@ -12,12 +12,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.eidu.content.launch.LaunchData
-import com.eidu.content.query.QueryIntent
 import com.eidu.content.result.LaunchResultData
-import com.eidu.content.result.QueryResultData
 import com.eidu.content.test.app.model.ContentApp
 import com.eidu.content.test.app.model.ContentUnit
-import com.eidu.content.test.app.model.QuerySource
 import com.eidu.content.test.app.model.persistence.ContentAppDao
 import com.eidu.content.test.app.service.ContentQueryService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,7 +30,6 @@ class ContentAppViewModel @Inject constructor(
 
     private val _contentUnits = MutableLiveData<Result<List<ContentUnit>>>(Result.Loading)
     private val _contentAppResult = MutableLiveData<Result<LaunchResultData>>()
-    private var _queriedContentApp: ContentApp? = null
 
     fun getContentApps(): LiveData<List<ContentApp>> = contentAppDao.getAll()
 
@@ -89,50 +85,11 @@ class ContentAppViewModel @Inject constructor(
                     _contentAppResult.postValue(
                         Result.Error(
                             "There was an error parsing the result intent: ${e.localizedMessage}." +
-                                "The resulting intent was: $resultIntent"
+                                    "The resulting intent was: $resultIntent"
                         )
                     )
                 }
             }
-        }
-    }
-
-    fun processQueryResult(activityResult: ActivityResult, context: Context) {
-        val currentQueriedApp = _queriedContentApp
-        _queriedContentApp = null
-        if (currentQueriedApp == null) {
-            return
-        } else {
-            val result: Result<List<ContentUnit>> = when {
-                activityResult.resultCode != Activity.RESULT_OK ->
-                    Result.Error("Unexpected result code: ${activityResult.resultCode}")
-                activityResult.data == null ->
-                    Result.Error("Result intent was null.")
-                else -> {
-                    val resultIntent = activityResult.data ?: error("This shouldn't be null here.")
-                    val contentAppVersion =
-                        contentQueryService.getContentAppVersion(currentQueriedApp, context)
-                            ?: error("We should be able to query the app version here.")
-                    try {
-                        val resultData = QueryResultData.fromQueryIntent(resultIntent)
-                            .contentIds.map {
-                                ContentUnit(
-                                    currentQueriedApp,
-                                    contentAppVersion,
-                                    it,
-                                    QuerySource.Intent
-                                )
-                            }
-                        Result.Success(resultData)
-                    } catch (e: IllegalArgumentException) {
-                        Result.Error(
-                            "There was an error parsing the result intent: ${e.localizedMessage}." +
-                                "The resulting intent was: $resultIntent"
-                        )
-                    }
-                }
-            }
-            _contentUnits.postValue(result)
         }
     }
 
@@ -161,40 +118,11 @@ class ContentAppViewModel @Inject constructor(
             _contentAppResult.postValue(
                 Result.Error(
                     "Unable to launch content unit ${contentUnit.unitId} because the activity" +
-                        " ${contentApp.packageName}/${contentApp.launchClass} could not be found. " +
-                        "Have you declared it in your AndroidManifest.xml file?"
+                            " ${contentApp.packageName}/${contentApp.launchClass} could not be found. " +
+                            "Have you declared it in your AndroidManifest.xml file?"
                 )
             )
         }
-    }
-
-    fun launchContentAppQuery(
-        context: Context,
-        contentApp: ContentApp,
-        contentAppQueryLauncher: ActivityResultLauncher<Intent>
-    ) {
-        _queriedContentApp = contentApp
-        val queryIntent = QueryIntent.createIntent(contentApp.queryAction)
-        if (supportsQueryIntent(context, queryIntent)) {
-            contentAppQueryLauncher.launch(queryIntent)
-        } else {
-            _queriedContentApp = null
-            _contentUnits.postValue(
-                Result.Error(
-                    "Could not query for units by intent. Have you" +
-                        "declared an activity filter responding to the '${queryIntent.action}' action " +
-                        "and added the 'DEFAULT' category?"
-                )
-            )
-        }
-    }
-
-    private fun supportsQueryIntent(
-        context: Context,
-        queryIntent: Intent
-    ): Boolean {
-        val resolvedActivity = context.packageManager.resolveActivity(queryIntent, 0)
-        return (resolvedActivity != null && resolvedActivity.isDefault)
     }
 
     private fun getLaunchIntent(contentApp: ContentApp, contentUnit: ContentUnit) =

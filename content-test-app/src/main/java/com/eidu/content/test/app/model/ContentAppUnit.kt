@@ -4,10 +4,5 @@ data class ContentUnit(
     val contentApp: ContentApp,
     val contentAppVersion: String,
     val unitId: String,
-    val querySource: QuerySource
+    val icon: String
 )
-
-enum class QuerySource {
-    ContentProvider,
-    Intent
-}
