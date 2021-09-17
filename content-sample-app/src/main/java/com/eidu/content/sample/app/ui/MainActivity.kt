@@ -53,7 +53,15 @@ class MainActivity : ComponentActivity() {
             LaunchData.fromLaunchIntent(intent)
         } catch (e: IllegalArgumentException) {
             Log.e("MainActivity", "onCreate: invalid launch intent: $intent", e)
-            setResult(RESULT_CANCELED)
+            setResult(
+                RESULT_CANCELED,
+                LaunchResultData.fromPlainData(
+                    "unknown",
+                    LaunchResultData.RunContentUnitResult.Error,
+                    0.0f,
+                    0L
+                ).toResultIntent()
+            )
             finish()
             null
         }
@@ -67,7 +75,7 @@ class MainActivity : ComponentActivity() {
                         )
                     )
                 }
-                EiduScaffold(title = { Text("Run of ${launchDataState.contentId})") }) {
+                EiduScaffold(title = { Text("Run of ${launchDataState.contentId}") }) {
                     Column {
                         Card(
                             border = BorderStroke(1.dp, Color.LightGray),
