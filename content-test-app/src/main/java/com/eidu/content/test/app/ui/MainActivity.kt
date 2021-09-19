@@ -25,7 +25,6 @@ import com.eidu.content.test.app.model.ContentApp
 import com.eidu.content.test.app.ui.screens.ContentAppResultScreen
 import com.eidu.content.test.app.ui.screens.ContentAppsScreen
 import com.eidu.content.test.app.ui.screens.ContentUnitsScreen
-import com.eidu.content.test.app.ui.screens.EditAppScreen
 import com.eidu.content.test.app.ui.theme.EIDUContentTestAppTheme
 import com.eidu.content.test.app.ui.viewmodel.ContentAppViewModel
 import com.eidu.content.test.app.ui.viewmodel.Result
@@ -61,7 +60,6 @@ class MainActivity : ComponentActivity() {
                             ContentAppsScreen(
                                 contentApps.value,
                                 { contentApp -> navController.navigate("content-apps/${contentApp.name}/units") },
-                                { contentApp -> navController.navigate("content-apps/${contentApp.name}/edit") },
                                 { contentApp -> contentAppViewModel.deleteContentApp(contentApp) },
                                 { packageFilePicker.launch(arrayOf("application/zip")) }
                             )
@@ -96,30 +94,6 @@ class MainActivity : ComponentActivity() {
                                             navController.navigate("content-apps/${contentApp.name}/edit")
                                         },
                                         goBack
-                                    )
-                                }
-                                is Result.NotFound -> navController.navigate("content-apps")
-                            }
-                        }
-                        composable("content-apps/create") {
-                            EditAppScreen(
-                                contentApp = null,
-                                onSubmit = {
-                                    contentAppViewModel.upsertContentApp(it)
-                                },
-                                goBack
-                            )
-                        }
-                        composable("content-apps/{app}/edit") { backStackEntry ->
-                            when (val app: Result<ContentApp> = getAppNameState(backStackEntry)) {
-                                is Result.Loading -> CircularProgressIndicator()
-                                is Result.Success -> {
-                                    EditAppScreen(
-                                        contentApp = app.result,
-                                        onSubmit = {
-                                            contentAppViewModel.upsertContentApp(it)
-                                        },
-                                        goBack = goBack
                                     )
                                 }
                                 is Result.NotFound -> navController.navigate("content-apps")

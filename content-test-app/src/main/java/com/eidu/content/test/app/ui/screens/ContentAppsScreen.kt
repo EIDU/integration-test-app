@@ -39,7 +39,6 @@ import com.eidu.content.test.app.ui.shared.SAMPLE_APP_2
 fun ContentAppsScreen(
     contentApps: List<ContentApp>,
     navigateToUnits: (app: ContentApp) -> Unit,
-    navigateToEditApp: (app: ContentApp) -> Unit,
     deleteContentApp: (app: ContentApp) -> Unit,
     openFilePicker: () -> Unit
 ) {
@@ -60,7 +59,6 @@ fun ContentAppsScreen(
                 ContentAppRow(
                     contentApp = it,
                     { -> navigateToUnits(it) },
-                    { -> navigateToEditApp(it) },
                     { -> deleteContentApp(it) }
                 )
                 Divider()
@@ -74,7 +72,6 @@ fun ContentAppsScreen(
 fun ContentAppRow(
     contentApp: ContentApp,
     navigateToUnits: () -> Unit,
-    navigateToEditApp: () -> Unit,
     deleteContentApp: () -> Unit
 ) {
     Row(
@@ -104,10 +101,6 @@ fun ContentAppRow(
                             )
                             Text("Delete")
                         }
-                        DropdownMenuItem(onClick = navigateToEditApp) {
-                            Icon(imageVector = Icons.Rounded.Edit, contentDescription = "Edit App")
-                            Text("Edit")
-                        }
                         DropdownMenuItem(onClick = navigateToUnits) {
                             Icon(
                                 imageVector = Icons.Rounded.ArrowForward,
@@ -128,7 +121,6 @@ private fun ContentAppScreenPreview() {
     ContentAppsScreen(
         contentApps = listOf(SAMPLE_APP_1, SAMPLE_APP_2),
         navigateToUnits = {},
-        navigateToEditApp = {},
         deleteContentApp = {},
         openFilePicker = {}
     )

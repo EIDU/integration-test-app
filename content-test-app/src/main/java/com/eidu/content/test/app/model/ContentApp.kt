@@ -11,15 +11,4 @@ data class ContentApp(
     @ColumnInfo(name = "launch_class") val launchClass: String,
     @ColumnInfo(name = "query_action") val queryAction: String,
     @ColumnInfo(name = "content_provider") val contentProvider: String
-) {
-    fun isValid(): Boolean =
-        name.isNotBlank() &&
-            packageName.isNotBlank() &&
-            launchClass.isNotBlank()
-
-    companion object {
-        fun empty(): ContentApp = ContentApp(
-            "", "", "", "", ""
-        )
-    }
-}
+)
