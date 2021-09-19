@@ -8,7 +8,5 @@ import androidx.room.PrimaryKey
 data class ContentApp(
     @PrimaryKey @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "package") val packageName: String,
-    @ColumnInfo(name = "launch_class") val launchClass: String,
-    @ColumnInfo(name = "query_action") val queryAction: String,
-    @ColumnInfo(name = "content_provider") val contentProvider: String
+    @ColumnInfo(name = "launch_class") val launchClass: String
 )

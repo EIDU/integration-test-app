@@ -155,8 +155,7 @@ class ContentAppViewModel @Inject constructor(
                 appMetadataJson["applicationPackage"]?.jsonPrimitive?.content
                     ?: error("Malformed application-metadata.json file"),
                 appMetadataJson["unitLaunchActivityClass"]?.jsonPrimitive?.content
-                    ?: error("Malformed application-metadata.json file"),
-                "", ""
+                    ?: error("Malformed application-metadata.json file")
             )
             val internalContentAppDir = getInternalFilesDir(context, contentApp)
             internalContentAppDir.mkdirs()

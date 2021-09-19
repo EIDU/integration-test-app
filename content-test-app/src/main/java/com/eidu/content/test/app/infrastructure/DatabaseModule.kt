@@ -2,6 +2,8 @@ package com.eidu.content.test.app.infrastructure
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.eidu.content.test.app.model.persistence.ContentAppDao
 import dagger.Module
 import dagger.Provides
@@ -20,9 +22,22 @@ class DatabaseModule {
             appContext,
             AppDatabase::class.java,
             "EIDU Content Apps"
+        ).addMigrations(
+            MIGRATION_1_2
         ).build()
     }
 
     @Provides
     fun contentAppDao(appDatabase: AppDatabase): ContentAppDao = appDatabase.contentAppDao()
+
+    companion object {
+        private val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("CREATE TABLE content_apps_migration (name TEXT NOT NULL PRIMARY KEY, package TEXT NOT NULL, launch_class TEXT NOT NULL)")
+                database.execSQL("INSERT INTO content_apps_migration SELECT name, package, launch_class FROM content_apps")
+                database.execSQL("DROP TABLE content_apps")
+                database.execSQL("ALTER TABLE content_apps_migration RENAME TO content_apps")
+            }
+        }
+    }
 }
