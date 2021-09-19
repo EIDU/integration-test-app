@@ -8,6 +8,7 @@ plugins {
     id("org.jetbrains.kotlin.kapt")
     id("dagger.hilt.android.plugin")
     id("org.jlleitschuh.gradle.ktlint") version Versions.ktlintGradle
+    kotlin("plugin.serialization") version "1.5.30"
 }
 
 val version = getAppVersion()
@@ -87,6 +88,7 @@ dependencies {
     implementation("com.google.android.material:material:1.4.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.3.1")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
 
     // Compose
     implementation("androidx.compose.ui:ui:${Versions.compose}")

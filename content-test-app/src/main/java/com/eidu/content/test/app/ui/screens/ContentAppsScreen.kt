@@ -10,6 +10,7 @@ import androidx.compose.material.Divider
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ExtendedFloatingActionButton
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -38,15 +39,19 @@ import com.eidu.content.test.app.ui.shared.SAMPLE_APP_2
 fun ContentAppsScreen(
     contentApps: List<ContentApp>,
     navigateToUnits: (app: ContentApp) -> Unit,
-    navigateToCreateNewApp: () -> Unit,
     navigateToEditApp: (app: ContentApp) -> Unit,
-    deleteContentApp: (app: ContentApp) -> Unit
+    deleteContentApp: (app: ContentApp) -> Unit,
+    openFilePicker: () -> Unit
 ) {
     EiduScaffold(
         floatingAction = {
-            FloatingActionButton(onClick = navigateToCreateNewApp) {
-                Icon(imageVector = Icons.Rounded.Add, contentDescription = "Add App")
-            }
+            ExtendedFloatingActionButton(
+                onClick = openFilePicker,
+                text = { Text(text = "Add content package") },
+                icon = {
+                    Icon(imageVector = Icons.Rounded.Add, contentDescription = "Add App")
+                }
+            )
         },
         title = { Text("Content Apps") }
     ) {
@@ -123,8 +128,8 @@ private fun ContentAppScreenPreview() {
     ContentAppsScreen(
         contentApps = listOf(SAMPLE_APP_1, SAMPLE_APP_2),
         navigateToUnits = {},
-        navigateToCreateNewApp = {},
         navigateToEditApp = {},
-        deleteContentApp = {}
+        deleteContentApp = {},
+        openFilePicker = {}
     )
 }

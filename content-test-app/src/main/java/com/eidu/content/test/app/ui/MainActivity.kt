@@ -2,6 +2,7 @@ package com.eidu.content.test.app.ui
 
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -41,6 +42,10 @@ class MainActivity : ComponentActivity() {
             ActivityResultContracts.StartActivityForResult(),
             ::handleContentAppResult
         )
+        val packageFilePicker = registerForActivityResult(
+            ActivityResultContracts.OpenDocument(),
+            ::handleFilePicked
+        )
         val clipboardService = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
         val copyToClipboardToast = Toast.makeText(this, "Copied to clipboard!", Toast.LENGTH_SHORT)
         setContent {
@@ -56,9 +61,9 @@ class MainActivity : ComponentActivity() {
                             ContentAppsScreen(
                                 contentApps.value,
                                 { contentApp -> navController.navigate("content-apps/${contentApp.name}/units") },
-                                { navController.navigate("content-apps/create") },
                                 { contentApp -> navController.navigate("content-apps/${contentApp.name}/edit") },
-                                { contentApp -> contentAppViewModel.deleteContentApp(contentApp) }
+                                { contentApp -> contentAppViewModel.deleteContentApp(contentApp) },
+                                { packageFilePicker.launch(arrayOf("application/zip")) }
                             )
                         }
                         composable("content-apps/{app}/units") { backStackEntry ->
@@ -155,6 +160,12 @@ class MainActivity : ComponentActivity() {
 
     private fun handleContentAppResult(activityResult: ActivityResult) {
         contentAppViewModel.processUnitRunResult(activityResult)
+    }
+
+    private fun handleFilePicked(uri: Uri?) {
+        if (uri != null) {
+            contentAppViewModel.handleContentPackageFile(applicationContext, uri)
+        }
     }
 
     @Composable

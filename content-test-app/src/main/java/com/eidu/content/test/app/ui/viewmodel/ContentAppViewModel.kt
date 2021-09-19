@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.util.Log
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -23,6 +24,11 @@ import com.eidu.content.test.app.model.persistence.ContentAppDao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import java.util.UUID
+import java.util.zip.ZipInputStream
 import javax.inject.Inject
 
 @HiltViewModel
@@ -65,16 +71,17 @@ class ContentAppViewModel @Inject constructor(
     ): LiveData<Result<List<ContentUnit>>> {
         _contentUnits.postValue(Result.Loading)
         viewModelScope.launch(Dispatchers.IO) {
-            val contentPackageDir =
-                context.getExternalFilesDir(null)?.resolve(contentApp.packageName)
-            val unitFile = contentPackageDir?.resolve("content-units.csv")
+            val contentPackageDir = getInternalFilesDir(context, contentApp)
+            val unitFile = contentPackageDir.resolve("content-units.csv")
             val contentAppVersion = getContentAppVersion(context, contentApp)
-            if (unitFile == null) {
-                _contentUnits.postValue(Result.Error("No access to external storage to read unit file.."))
-            } else if (!unitFile.exists()) {
+            if (!unitFile.exists()) {
                 clipboardService.setPrimaryClip(ClipData.newPlainText("Unit File", unitFile.path))
-                _contentUnits.postValue(Result.Error("Units file ${unitFile.path} does not exist. " +
-                        "The path was copied to your clipboard so you can push it using 'adb push content-units.csv ${unitFile.path}'"))
+                _contentUnits.postValue(
+                    Result.Error(
+                        "Units file ${unitFile.path} does not exist. " +
+                                "The path was copied to your clipboard so you can push it using 'adb push content-units.csv ${unitFile.path}'"
+                    )
+                )
             } else if (contentAppVersion == null) {
                 _contentUnits.postValue(Result.Error("Unable to determine content app version"))
             } else {
@@ -119,6 +126,50 @@ class ContentAppViewModel @Inject constructor(
             }
         }
     }
+
+    fun handleContentPackageFile(context: Context, uri: Uri) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val extractionDir = context.cacheDir.resolve(UUID.randomUUID().toString())
+            extractionDir.mkdir()
+            context.contentResolver.openInputStream(uri)?.use {
+                val stream = ZipInputStream(it)
+                var entry = stream.nextEntry
+                while (entry != null) {
+                    if (entry.isDirectory) {
+                        Log.i("ContentAppViewModel", "Extracting directory ${entry.name}")
+                        extractionDir.resolve(entry.name).mkdirs()
+                    } else {
+                        Log.i("ContentAppViewModel", "Extracting file ${entry.name}")
+                        val extractTo = extractionDir.resolve(entry.name)
+                        stream.copyTo(extractTo.outputStream())
+                    }
+                    stream.closeEntry()
+                    entry = stream.nextEntry
+                }
+            }
+            val appMetadataJson = extractionDir.resolve("application-metadata.json")
+                .readText().let { Json.parseToJsonElement(it) }.jsonObject
+            val contentApp = ContentApp(
+                appMetadataJson["applicationName"]?.jsonPrimitive?.content
+                    ?: error("Malformed application-metadata.json file"),
+                appMetadataJson["applicationPackage"]?.jsonPrimitive?.content
+                    ?: error("Malformed application-metadata.json file"),
+                appMetadataJson["unitLaunchActivityClass"]?.jsonPrimitive?.content
+                    ?: error("Malformed application-metadata.json file"),
+                "", ""
+            )
+            val internalContentAppDir = getInternalFilesDir(context, contentApp)
+            internalContentAppDir.mkdirs()
+            extractionDir.copyRecursively(internalContentAppDir, overwrite = true)
+            extractionDir.deleteRecursively()
+            upsertContentApp(contentApp)
+        }
+    }
+
+    private fun getInternalFilesDir(
+        context: Context,
+        contentApp: ContentApp
+    ) = context.filesDir.resolve(contentApp.packageName)
 
     fun getContentAppResult(): LiveData<Result<LaunchResultData>> = _contentAppResult
 
