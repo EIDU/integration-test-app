@@ -60,7 +60,7 @@ fun ContentAppsScreen(
                 text = {
                     Text(
                         "Upload your content package to the device (e.g. `adb push content-package.zip" +
-                                " /sdcard/Download`) and add your app through 'Add content package'"
+                            " /sdcard/Download`) and add your app through 'Add content package'"
                     )
                 },
                 icon = { Icon(Icons.Default.Info, "How to add content package") }
