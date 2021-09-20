@@ -110,7 +110,7 @@ dependencies {
     kapt("com.google.dagger:hilt-android-compiler:${Versions.hilt}")
 
     // EIDU dependencies
-    implementation("com.eidu:content-app-library:1.0.23")
+    implementation("com.eidu:content-app-library:1.0.29")
 
     // Test
     testImplementation("junit:junit:4.+")

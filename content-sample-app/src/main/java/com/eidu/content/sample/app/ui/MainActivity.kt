@@ -34,8 +34,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.eidu.content.launch.LaunchData
-import com.eidu.content.result.LaunchResultData
+import com.eidu.content.integration.RunContentUnitRequest
+import com.eidu.content.integration.RunContentUnitResult
 import com.eidu.content.sample.app.EIDUContentTestAppTheme
 import com.eidu.content.sample.app.shared.EiduScaffold
 import java.util.Timer
@@ -49,18 +49,18 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val launchData: LaunchData? = try {
-            LaunchData.fromLaunchIntent(intent)
+        val request: RunContentUnitRequest? = try {
+            RunContentUnitRequest.fromIntent(intent)
         } catch (e: IllegalArgumentException) {
             Log.e("MainActivity", "onCreate: invalid launch intent: $intent", e)
             setResult(
                 RESULT_CANCELED,
-                LaunchResultData.fromPlainData(
+                RunContentUnitResult.ofError(
                     "unknown",
-                    LaunchResultData.RunContentUnitResult.Error,
-                    0.0f,
-                    0L
-                ).toResultIntent()
+                    0L,
+                    "Invalid Intent received: $intent",
+                    null
+                ).toIntent()
             )
             finish()
             null
@@ -68,14 +68,14 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             EIDUContentTestAppTheme {
-                var launchDataState by remember {
+                var requestDataState by remember {
                     mutableStateOf(
-                        contentUnitRunViewModel.unitResultDataFromLaunchData(
-                            launchData
+                        contentUnitRunViewModel.resultFromRequest(
+                            request
                         )
                     )
                 }
-                EiduScaffold(title = { Text("Run of ${launchDataState.contentId}") }) {
+                EiduScaffold(title = { Text("Run of ${requestDataState.contentId}") }) {
                     Column {
                         Card(
                             border = BorderStroke(1.dp, Color.LightGray),
@@ -84,36 +84,36 @@ class MainActivity : ComponentActivity() {
                             Column {
                                 var expanded by remember { mutableStateOf(false) }
                                 ListItem(
-                                    text = { Text("Launch Data") }
+                                    text = { Text("Request Data") }
                                 )
                                 Divider()
                                 if (expanded) {
                                     ListItem(
-                                        text = { Text(launchDataState.contentId) },
+                                        text = { Text(requestDataState.contentId) },
                                         secondaryText = { Text("Content Unit ID") }
                                     )
                                     ListItem(
-                                        text = { Text(launchDataState.contentRunId) },
+                                        text = { Text(requestDataState.contentRunId) },
                                         secondaryText = { Text("Content Unit Run ID") }
                                     )
                                     ListItem(
-                                        text = { Text(launchDataState.learnerId) },
+                                        text = { Text(requestDataState.learnerId) },
                                         secondaryText = { Text("Learner ID") }
                                     )
                                     ListItem(
-                                        text = { Text(launchDataState.schoolId) },
+                                        text = { Text(requestDataState.schoolId) },
                                         secondaryText = { Text("School ID") }
                                     )
                                     ListItem(
-                                        text = { Text(launchDataState.environment) },
-                                        secondaryText = { Text("Environment") }
+                                        text = { Text(requestDataState.stage) },
+                                        secondaryText = { Text("Stage") }
                                     )
                                     ListItem(
-                                        text = { Text("${launchDataState.remainingForegroundTime}") },
+                                        text = { Text("${requestDataState.remainingForegroundTime}") },
                                         secondaryText = { Text("Remaining Foreground Time") }
                                     )
                                     ListItem(
-                                        text = { Text("${launchDataState.inactivityTimeout}") },
+                                        text = { Text("${requestDataState.inactivityTimeout}") },
                                         secondaryText = { Text("Inactivity Timeout") }
                                     )
                                     Divider()
@@ -132,46 +132,26 @@ class MainActivity : ComponentActivity() {
                                     key1 = true,
                                     block = {
                                         foregroundTimeTimer {
-                                            launchDataState =
-                                                launchDataState.copy(foregroundTimeInMs = it)
+                                            requestDataState =
+                                                requestDataState.copy(foregroundTimeInMs = it)
                                         }
                                     }
                                 )
                                 ListItem(
-                                    text = { Text("Response Data") }
-                                )
-                                Row {
-                                    ListItem(
-                                        text = { Text("${launchDataState.score}") },
-                                        secondaryText = { Text("Score") },
-                                        modifier = Modifier.fillMaxWidth(0.3f)
-                                    )
-                                    Slider(
-                                        value = launchDataState.score,
-                                        onValueChange = {
-                                            launchDataState = launchDataState.copy(score = it)
-                                        },
-                                        modifier = Modifier
-                                            .padding(5.dp, 0.dp)
-                                            .fillMaxWidth(1f)
-                                    )
-                                }
-                                ListItem(
-                                    text = { Text("${launchDataState.foregroundTimeInMs}") },
-                                    secondaryText = { Text("Foreground Time") }
+                                    text = { Text("Result Data") }
                                 )
                                 Column(Modifier.selectableGroup()) {
-                                    LaunchResultData.RunContentUnitResult.values()
+                                    RunContentUnitResult.ResultType.values()
                                         .forEach { result ->
                                             Row(
                                                 Modifier
                                                     .fillMaxWidth()
                                                     .height(56.dp)
                                                     .selectable(
-                                                        selected = (result == launchDataState.launchResult),
+                                                        selected = (result == requestDataState.resultType),
                                                         onClick = {
-                                                            launchDataState =
-                                                                launchDataState.copy(launchResult = result)
+                                                            requestDataState =
+                                                                requestDataState.copy(resultType = result)
                                                         },
                                                         role = Role.RadioButton
                                                     )
@@ -179,7 +159,7 @@ class MainActivity : ComponentActivity() {
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
                                                 RadioButton(
-                                                    selected = (result == launchDataState.launchResult),
+                                                    selected = (result == requestDataState.resultType),
                                                     onClick = null
                                                 )
                                                 Text(
@@ -190,10 +170,46 @@ class MainActivity : ComponentActivity() {
                                             }
                                         }
                                 }
+                                if (requestDataState.resultType == RunContentUnitResult.ResultType.Success) {
+                                    Row {
+                                        ListItem(
+                                            text = { Text("${requestDataState.score}") },
+                                            secondaryText = { Text("Score") },
+                                            modifier = Modifier.fillMaxWidth(0.3f)
+                                        )
+                                        Slider(
+                                            value = requestDataState.score,
+                                            onValueChange = {
+                                                requestDataState = requestDataState.copy(score = it)
+                                            },
+                                            modifier = Modifier
+                                                .padding(5.dp, 0.dp)
+                                                .fillMaxWidth(1f)
+                                        )
+                                    }
+                                }
+                                ListItem(
+                                    text = { Text("${requestDataState.foregroundTimeInMs}") },
+                                    secondaryText = { Text("Foreground Time") }
+                                )
+                                if (requestDataState.resultType == RunContentUnitResult.ResultType.Error) {
+                                    OutlinedTextField(
+                                        value = requestDataState.errorDetails,
+                                        onValueChange = {
+                                            requestDataState =
+                                                requestDataState.copy(errorDetails = it)
+                                        },
+                                        label = { Text("Error Details") },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(5.dp)
+                                    )
+                                }
                                 OutlinedTextField(
-                                    value = launchDataState.additionalData ?: "",
+                                    value = requestDataState.additionalData ?: "",
                                     onValueChange = {
-                                        launchDataState = launchDataState.copy(additionalData = it)
+                                        requestDataState =
+                                            requestDataState.copy(additionalData = it)
                                     },
                                     label = { Text("Additional Data") },
                                     modifier = Modifier
@@ -203,7 +219,7 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         Button(
-                            onClick = { sendResult(launchDataState) },
+                            onClick = { sendResult(requestDataState) },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(5.dp)
@@ -217,7 +233,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun sendResult(unitResultData: UnitResultData) {
-        setResult(RESULT_OK, unitResultData.toLaunchResultData().toResultIntent())
+        setResult(RESULT_OK, unitResultData.toResult().toIntent())
         finish()
     }
 

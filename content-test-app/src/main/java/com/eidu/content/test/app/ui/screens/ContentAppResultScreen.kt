@@ -10,7 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.eidu.content.result.LaunchResultData
+import com.eidu.content.integration.RunContentUnitResult
 import com.eidu.content.test.app.model.ContentApp
 import com.eidu.content.test.app.ui.shared.ContentAppErrorDisplay
 import com.eidu.content.test.app.ui.shared.EiduScaffold
@@ -21,7 +21,7 @@ import com.eidu.content.test.app.ui.viewmodel.Result
 @Composable
 fun ContentAppResultScreen(
     contentApp: ContentApp,
-    contentAppResult: Result<LaunchResultData>,
+    contentAppResult: Result<RunContentUnitResult>,
     copyToClipboard: (String, String) -> Unit,
     goToEditScreen: () -> Unit,
     goBack: () -> Unit
@@ -36,10 +36,11 @@ fun ContentAppResultScreen(
                     ResultFields(
                         fields = mapOf(
                             "Content ID" to contentId,
-                            "Result" to runContentUnitResult.toString(),
-                            "Score" to "$score",
+                            "Result" to resultType.toString(),
+                            "Score" to (if (resultType == RunContentUnitResult.ResultType.Success) "$score" else null),
                             "Foreground duration" to "$foregroundDurationInMs",
-                            "Additional data" to "$additionalData"
+                            "Additional data" to "$additionalData",
+                            "Error Details" to (if (resultType == RunContentUnitResult.ResultType.Error) "$errorDetails" else null)
                         ),
                         copyToClipboard
                     )
@@ -60,21 +61,23 @@ fun ContentAppResultScreen(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun ResultFields(fields: Map<String, String>, copyToClipboard: (String, String) -> Unit) {
+private fun ResultFields(fields: Map<String, String?>, copyToClipboard: (String, String) -> Unit) {
     Column {
         fields.map { (key, value) ->
-            ListItem(
-                text = { Text(value) },
-                secondaryText = { Text(key) },
-                trailing = {
-                    IconButton(onClick = { copyToClipboard(key, value) }) {
-                        Icon(
-                            imageVector = Icons.Default.ContentCopy,
-                            contentDescription = "Copy value of $key to clipboard"
-                        )
+            if (value != null) {
+                ListItem(
+                    text = { Text(value) },
+                    secondaryText = { Text(key) },
+                    trailing = {
+                        IconButton(onClick = { copyToClipboard(key, value) }) {
+                            Icon(
+                                imageVector = Icons.Default.ContentCopy,
+                                contentDescription = "Copy value of $key to clipboard"
+                            )
+                        }
                     }
-                }
-            )
+                )
+            }
         }
     }
 }
@@ -85,9 +88,8 @@ private fun ContentAppResultScreenPreview() {
     ContentAppResultScreen(
         SAMPLE_APP_1,
         Result.Success(
-            LaunchResultData.fromPlainData(
+            RunContentUnitResult.ofSuccess(
                 "03.EIDU.FishTank",
-                LaunchResultData.RunContentUnitResult.Success,
                 1.0f,
                 48_735,
                 "{ \"numberOfClicks\": 14 }"

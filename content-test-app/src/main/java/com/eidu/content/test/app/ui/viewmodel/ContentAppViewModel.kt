@@ -16,8 +16,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.eidu.content.launch.LaunchData
-import com.eidu.content.result.LaunchResultData
+import com.eidu.content.integration.RunContentUnitRequest
+import com.eidu.content.integration.RunContentUnitResult
 import com.eidu.content.test.app.model.ContentApp
 import com.eidu.content.test.app.model.ContentUnit
 import com.eidu.content.test.app.model.persistence.ContentAppDao
@@ -37,7 +37,7 @@ class ContentAppViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _contentUnits = MutableLiveData<Result<List<ContentUnit>>>(Result.Loading)
-    private val _contentAppResult = MutableLiveData<Result<LaunchResultData>>()
+    private val _contentAppResult = MutableLiveData<Result<RunContentUnitResult>>()
 
     fun getContentApps(): LiveData<List<ContentApp>> = contentAppDao.getAll()
 
@@ -113,7 +113,7 @@ class ContentAppViewModel @Inject constructor(
             else -> {
                 val resultIntent = activityResult.data ?: error("This shouldn't be null here.")
                 try {
-                    val resultData = LaunchResultData.fromResultIntent(resultIntent)
+                    val resultData = RunContentUnitResult.fromIntent(resultIntent)
                     _contentAppResult.postValue(Result.Success(resultData))
                 } catch (e: IllegalArgumentException) {
                     _contentAppResult.postValue(
@@ -170,7 +170,7 @@ class ContentAppViewModel @Inject constructor(
         contentApp: ContentApp
     ) = context.filesDir.resolve(contentApp.packageName)
 
-    fun getContentAppResult(): LiveData<Result<LaunchResultData>> = _contentAppResult
+    fun getContentAppResult(): LiveData<Result<RunContentUnitResult>> = _contentAppResult
 
     fun launchContentAppUnit(
         context: Context,
@@ -203,7 +203,7 @@ class ContentAppViewModel @Inject constructor(
     }
 
     private fun getLaunchIntent(contentApp: ContentApp, contentUnit: ContentUnit) =
-        LaunchData.fromPlainData(
+        RunContentUnitRequest.of(
             contentUnit.unitId,
             "Test Run",
             "Test Learner",
@@ -211,7 +211,7 @@ class ContentAppViewModel @Inject constructor(
             "test",
             null,
             null
-        ).toLaunchIntent(contentApp.packageName, contentApp.launchClass)
+        ).toIntent(contentApp.packageName, contentApp.launchClass)
 
     private fun clearContentAppResult() {
         _contentAppResult.postValue(Result.Loading)
