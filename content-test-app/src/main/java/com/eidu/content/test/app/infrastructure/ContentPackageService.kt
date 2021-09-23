@@ -14,6 +14,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import java.io.File
 import java.util.UUID
 import java.util.zip.ZipInputStream
 import javax.inject.Inject
@@ -28,32 +29,19 @@ class ContentPackageService @Inject constructor(
         contentApp: ContentApp,
         clipboardService: ClipboardManager
     ): Result<List<ContentUnit>> {
-        val contentPackageDir = getInternalFilesDir(context, contentApp)
-        val unitFile = contentPackageDir.resolve("content-units.csv")
+        val unitFile = getContentAppUnitFile(contentApp)
         val contentAppVersion = getContentAppVersion(context, contentApp)
-        if (!unitFile.exists()) {
+        return if (!unitFile.exists()) {
             clipboardService.setPrimaryClip(ClipData.newPlainText("Unit File", unitFile.path))
-            return Result.Error(
+            Result.Error(
                 "Units file ${unitFile.path} does not exist. The path was copied to your " +
                         "clipboard so you can push it using 'adb push content-units.csv ${unitFile.path}'"
             )
         } else if (contentAppVersion == null) {
-            return Result.Error("Unable to determine content app version")
+            Result.Error("Unable to determine content app version")
         } else {
-            val contentUnits = unitFile.readLines()
-                .mapIndexedNotNull { index, line ->
-                    if (index in (0..1)) null
-                    else {
-                        val (unitId, icon, _) = line.split(";")
-                        ContentUnit(
-                            contentApp,
-                            contentAppVersion,
-                            unitId,
-                            icon
-                        )
-                    }
-                }
-            return Result.Success(contentUnits)
+            val contentUnits = readContentUnitsFromFile(unitFile, contentApp, contentAppVersion)
+            Result.Success(contentUnits)
         }
     }
 
@@ -111,5 +99,28 @@ class ContentPackageService @Inject constructor(
                 e
             )
             null
+        }
+
+    private fun getContentAppUnitFile(contentApp: ContentApp): File {
+        val contentPackageDir = getInternalFilesDir(context, contentApp)
+        return contentPackageDir.resolve("content-units.csv")
+    }
+
+    private fun readContentUnitsFromFile(
+        unitFile: File,
+        contentApp: ContentApp,
+        contentAppVersion: String
+    ) = unitFile.readLines()
+        .mapIndexedNotNull { index, line ->
+            if (index in (0..1)) null
+            else {
+                val (unitId, icon, _) = line.split(";")
+                ContentUnit(
+                    contentApp,
+                    contentAppVersion,
+                    unitId,
+                    icon
+                )
+            }
         }
 }
