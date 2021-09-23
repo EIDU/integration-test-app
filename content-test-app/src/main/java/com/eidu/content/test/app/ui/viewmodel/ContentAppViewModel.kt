@@ -22,11 +22,6 @@ import com.eidu.content.test.app.model.persistence.ContentAppDao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import java.util.UUID
-import java.util.zip.ZipInputStream
 import javax.inject.Inject
 
 @HiltViewModel
@@ -102,42 +97,10 @@ class ContentAppViewModel @Inject constructor(
         }
     }
 
-    fun handleContentPackageFile(context: Context, uri: Uri) {
+    fun handleContentPackageFile(uri: Uri) {
         viewModelScope.launch(Dispatchers.IO) {
-            val extractionDir = context.cacheDir.resolve(UUID.randomUUID().toString())
-            extractionDir.mkdir()
-            context.contentResolver.openInputStream(uri)?.use {
-                val stream = ZipInputStream(it)
-                var entry = stream.nextEntry
-                while (entry != null) {
-                    if (entry.isDirectory) {
-                        Log.i("ContentAppViewModel", "Extracting directory ${entry.name}")
-                        extractionDir.resolve(entry.name).mkdirs()
-                    } else {
-                        Log.i("ContentAppViewModel", "Extracting file ${entry.name}")
-                        val extractTo = extractionDir.resolve(entry.name)
-                        stream.copyTo(extractTo.outputStream())
-                    }
-                    stream.closeEntry()
-                    entry = stream.nextEntry
-                }
-            }
-            val appMetadataJson = extractionDir.resolve("application-metadata.json")
-                .readText().let { Json.parseToJsonElement(it) }.jsonObject
-            val contentApp = ContentApp(
-                appMetadataJson["applicationName"]?.jsonPrimitive?.content
-                    ?: error("Malformed application-metadata.json file"),
-                appMetadataJson["applicationPackage"]?.jsonPrimitive?.content
-                    ?: error("Malformed application-metadata.json file"),
-                appMetadataJson["unitLaunchActivityClass"]?.jsonPrimitive?.content
-                    ?: error("Malformed application-metadata.json file")
-            )
-            val internalContentAppDir =
-                contentPackageService.getInternalFilesDir(context, contentApp)
-            internalContentAppDir.mkdirs()
-            extractionDir.copyRecursively(internalContentAppDir, overwrite = true)
-            extractionDir.deleteRecursively()
-            upsertContentApp(contentApp)
+            val contentAppFromPackage = contentPackageService.extractContentPackage(uri)
+            upsertContentApp(contentAppFromPackage)
         }
     }
 

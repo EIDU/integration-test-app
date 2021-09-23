@@ -137,7 +137,7 @@ class MainActivity : ComponentActivity() {
 
     private fun handleFilePicked(uri: Uri?) {
         if (uri != null) {
-            contentAppViewModel.handleContentPackageFile(applicationContext, uri)
+            contentAppViewModel.handleContentPackageFile(uri)
         }
     }
 
