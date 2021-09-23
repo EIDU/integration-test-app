@@ -1,12 +1,9 @@
 package com.eidu.content.test.app.ui.viewmodel
 
 import android.app.Activity
-import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
 import androidx.activity.result.ActivityResult
@@ -18,6 +15,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.eidu.content.integration.RunContentUnitRequest
 import com.eidu.content.integration.RunContentUnitResult
+import com.eidu.content.test.app.infrastructure.ContentPackageService
 import com.eidu.content.test.app.model.ContentApp
 import com.eidu.content.test.app.model.ContentUnit
 import com.eidu.content.test.app.model.persistence.ContentAppDao
@@ -33,7 +31,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ContentAppViewModel @Inject constructor(
-    private val contentAppDao: ContentAppDao
+    private val contentAppDao: ContentAppDao,
+    private val contentPackageService: ContentPackageService
 ) : ViewModel() {
 
     private val _contentUnits = MutableLiveData<Result<List<ContentUnit>>>(Result.Loading)
@@ -65,41 +64,17 @@ class ContentAppViewModel @Inject constructor(
     }
 
     fun loadUnitsFromCSVFile(
-        context: Context,
         contentApp: ContentApp,
         clipboardService: ClipboardManager
     ): LiveData<Result<List<ContentUnit>>> {
         _contentUnits.postValue(Result.Loading)
         viewModelScope.launch(Dispatchers.IO) {
-            val contentPackageDir = getInternalFilesDir(context, contentApp)
-            val unitFile = contentPackageDir.resolve("content-units.csv")
-            val contentAppVersion = getContentAppVersion(context, contentApp)
-            if (!unitFile.exists()) {
-                clipboardService.setPrimaryClip(ClipData.newPlainText("Unit File", unitFile.path))
-                _contentUnits.postValue(
-                    Result.Error(
-                        "Units file ${unitFile.path} does not exist. " +
-                            "The path was copied to your clipboard so you can push it using 'adb push content-units.csv ${unitFile.path}'"
-                    )
+            _contentUnits.postValue(
+                contentPackageService.getContentUnits(
+                    contentApp,
+                    clipboardService
                 )
-            } else if (contentAppVersion == null) {
-                _contentUnits.postValue(Result.Error("Unable to determine content app version"))
-            } else {
-                val contentUnits = unitFile.readLines()
-                    .mapIndexedNotNull { index, line ->
-                        if (index in (0..1)) null
-                        else {
-                            val (unitId, icon, _) = line.split(";")
-                            ContentUnit(
-                                contentApp,
-                                contentAppVersion,
-                                unitId,
-                                icon
-                            )
-                        }
-                    }
-                _contentUnits.postValue(Result.Success(contentUnits))
-            }
+            )
         }
         return _contentUnits
     }
@@ -119,7 +94,7 @@ class ContentAppViewModel @Inject constructor(
                     _contentAppResult.postValue(
                         Result.Error(
                             "There was an error parsing the result intent: ${e.localizedMessage}." +
-                                "The resulting intent was: $resultIntent"
+                                    "The resulting intent was: $resultIntent"
                         )
                     )
                 }
@@ -157,18 +132,14 @@ class ContentAppViewModel @Inject constructor(
                 appMetadataJson["unitLaunchActivityClass"]?.jsonPrimitive?.content
                     ?: error("Malformed application-metadata.json file")
             )
-            val internalContentAppDir = getInternalFilesDir(context, contentApp)
+            val internalContentAppDir =
+                contentPackageService.getInternalFilesDir(context, contentApp)
             internalContentAppDir.mkdirs()
             extractionDir.copyRecursively(internalContentAppDir, overwrite = true)
             extractionDir.deleteRecursively()
             upsertContentApp(contentApp)
         }
     }
-
-    private fun getInternalFilesDir(
-        context: Context,
-        contentApp: ContentApp
-    ) = context.filesDir.resolve(contentApp.packageName)
 
     fun getContentAppResult(): LiveData<Result<RunContentUnitResult>> = _contentAppResult
 
@@ -195,8 +166,8 @@ class ContentAppViewModel @Inject constructor(
             _contentAppResult.postValue(
                 Result.Error(
                     "Unable to launch content unit ${contentUnit.unitId} because the activity" +
-                        " ${contentApp.packageName}/${contentApp.launchClass} could not be found. " +
-                        "Have you declared it in your AndroidManifest.xml file?"
+                            " ${contentApp.packageName}/${contentApp.launchClass} could not be found. " +
+                            "Have you declared it in your AndroidManifest.xml file?"
                 )
             )
         }
@@ -216,21 +187,6 @@ class ContentAppViewModel @Inject constructor(
     private fun clearContentAppResult() {
         _contentAppResult.postValue(Result.Loading)
     }
-
-    private fun getContentAppVersion(context: Context, contentApp: ContentApp): String? =
-        getContentAppInfo(context, contentApp)?.versionName
-
-    private fun getContentAppInfo(context: Context, contentApp: ContentApp): PackageInfo? =
-        try {
-            context.packageManager.getPackageInfo(contentApp.packageName, 0)
-        } catch (e: PackageManager.NameNotFoundException) {
-            Log.e(
-                "ContentAppViewModel",
-                "getContentAppInfo: unable to query content info for package ${contentApp.packageName}",
-                e
-            )
-            null
-        }
 }
 
 sealed class Result<out T> {
