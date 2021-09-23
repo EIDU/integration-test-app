@@ -89,7 +89,7 @@ class ContentAppViewModel @Inject constructor(
                     _contentAppResult.postValue(
                         Result.Error(
                             "There was an error parsing the result intent: ${e.localizedMessage}." +
-                                    "The resulting intent was: $resultIntent"
+                                "The resulting intent was: $resultIntent"
                         )
                     )
                 }
@@ -129,8 +129,8 @@ class ContentAppViewModel @Inject constructor(
             _contentAppResult.postValue(
                 Result.Error(
                     "Unable to launch content unit ${contentUnit.unitId} because the activity" +
-                            " ${contentApp.packageName}/${contentApp.launchClass} could not be found. " +
-                            "Have you declared it in your AndroidManifest.xml file?"
+                        " ${contentApp.packageName}/${contentApp.launchClass} could not be found. " +
+                        "Have you declared it in your AndroidManifest.xml file?"
                 )
             )
         }

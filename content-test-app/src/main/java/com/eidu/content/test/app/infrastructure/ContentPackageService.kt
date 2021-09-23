@@ -35,7 +35,7 @@ class ContentPackageService @Inject constructor(
             clipboardService.setPrimaryClip(ClipData.newPlainText("Unit File", unitFile.path))
             Result.Error(
                 "Units file ${unitFile.path} does not exist. The path was copied to your " +
-                        "clipboard so you can push it using 'adb push content-units.csv ${unitFile.path}'"
+                    "clipboard so you can push it using 'adb push content-units.csv ${unitFile.path}'"
             )
         } else if (contentAppVersion == null) {
             Result.Error("Unable to determine content app version")
