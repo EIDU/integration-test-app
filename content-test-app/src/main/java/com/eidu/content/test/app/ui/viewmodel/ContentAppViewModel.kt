@@ -99,7 +99,7 @@ class ContentAppViewModel @Inject constructor(
 
     fun handleContentPackageFile(uri: Uri) {
         viewModelScope.launch(Dispatchers.IO) {
-            val contentAppFromPackage = contentPackageService.extractContentPackage(uri)
+            val contentAppFromPackage = contentPackageService.loadContentAppFromContentPackage(uri)
             upsertContentApp(contentAppFromPackage)
         }
     }

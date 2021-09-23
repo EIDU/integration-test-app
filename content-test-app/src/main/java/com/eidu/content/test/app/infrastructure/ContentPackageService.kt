@@ -45,39 +45,10 @@ class ContentPackageService @Inject constructor(
         }
     }
 
-    fun extractContentPackage(uri: Uri): ContentApp {
-        val extractionDir = context.cacheDir.resolve(UUID.randomUUID().toString())
-        extractionDir.mkdir()
-        context.contentResolver.openInputStream(uri)?.use {
-            val stream = ZipInputStream(it)
-            var entry = stream.nextEntry
-            while (entry != null) {
-                if (entry.isDirectory) {
-                    Log.i("ContentAppViewModel", "Extracting directory ${entry.name}")
-                    extractionDir.resolve(entry.name).mkdirs()
-                } else {
-                    Log.i("ContentAppViewModel", "Extracting file ${entry.name}")
-                    val extractTo = extractionDir.resolve(entry.name)
-                    stream.copyTo(extractTo.outputStream())
-                }
-                stream.closeEntry()
-                entry = stream.nextEntry
-            }
-        }
-        val appMetadataJson = extractionDir.resolve("application-metadata.json")
-            .readText().let { Json.parseToJsonElement(it) }.jsonObject
-        val contentApp = ContentApp(
-            appMetadataJson["applicationName"]?.jsonPrimitive?.content
-                ?: error("Malformed application-metadata.json file"),
-            appMetadataJson["applicationPackage"]?.jsonPrimitive?.content
-                ?: error("Malformed application-metadata.json file"),
-            appMetadataJson["unitLaunchActivityClass"]?.jsonPrimitive?.content
-                ?: error("Malformed application-metadata.json file")
-        )
-        val internalContentAppDir = getInternalFilesDir(context, contentApp)
-        internalContentAppDir.mkdirs()
-        extractionDir.copyRecursively(internalContentAppDir, overwrite = true)
-        extractionDir.deleteRecursively()
+    fun loadContentAppFromContentPackage(uri: Uri): ContentApp {
+        val extractionDir = extractPackageFile(uri)
+        val contentApp = readContentAppMetadata(extractionDir)
+        copyPackageContentToInternalFiles(contentApp, extractionDir)
         return contentApp
     }
 
@@ -123,4 +94,49 @@ class ContentPackageService @Inject constructor(
                 )
             }
         }
+
+    private fun extractPackageFile(uri: Uri): File {
+        val extractionDir = context.cacheDir.resolve(UUID.randomUUID().toString())
+        extractionDir.mkdir()
+        context.contentResolver.openInputStream(uri)?.use {
+            val stream = ZipInputStream(it)
+            var entry = stream.nextEntry
+            while (entry != null) {
+                if (entry.isDirectory) {
+                    Log.i("ContentAppViewModel", "Extracting directory ${entry.name}")
+                    extractionDir.resolve(entry.name).mkdirs()
+                } else {
+                    Log.i("ContentAppViewModel", "Extracting file ${entry.name}")
+                    val extractTo = extractionDir.resolve(entry.name)
+                    stream.copyTo(extractTo.outputStream())
+                }
+                stream.closeEntry()
+                entry = stream.nextEntry
+            }
+        }
+        return extractionDir
+    }
+
+    private fun readContentAppMetadata(extractionDir: File): ContentApp {
+        val appMetadataJson = extractionDir.resolve("application-metadata.json")
+            .readText().let { Json.parseToJsonElement(it) }.jsonObject
+        return ContentApp(
+            appMetadataJson["applicationName"]?.jsonPrimitive?.content
+                ?: error("Malformed application-metadata.json file"),
+            appMetadataJson["applicationPackage"]?.jsonPrimitive?.content
+                ?: error("Malformed application-metadata.json file"),
+            appMetadataJson["unitLaunchActivityClass"]?.jsonPrimitive?.content
+                ?: error("Malformed application-metadata.json file")
+        )
+    }
+
+    private fun copyPackageContentToInternalFiles(
+        contentApp: ContentApp,
+        extractionDir: File
+    ) {
+        val internalContentAppDir = getInternalFilesDir(context, contentApp)
+        internalContentAppDir.mkdirs()
+        extractionDir.copyRecursively(internalContentAppDir, overwrite = true)
+        extractionDir.deleteRecursively()
+    }
 }
