@@ -11,9 +11,10 @@ import com.eidu.content.test.app.model.ContentApp
 import com.eidu.content.test.app.model.ContentUnit
 import com.eidu.content.test.app.ui.viewmodel.Result
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
 import java.util.UUID
 import java.util.zip.ZipInputStream
@@ -40,8 +41,7 @@ class ContentPackageService @Inject constructor(
         } else if (contentAppVersion == null) {
             Result.Error("Unable to determine content app version")
         } else {
-            val contentUnits = readContentUnitsFromFile(unitFile, contentApp, contentAppVersion)
-            Result.Success(contentUnits)
+            readContentUnitsFromFile(unitFile, contentApp, contentAppVersion)
         }
     }
 
@@ -74,26 +74,29 @@ class ContentPackageService @Inject constructor(
 
     private fun getContentAppUnitFile(contentApp: ContentApp): File {
         val contentPackageDir = getInternalFilesDir(context, contentApp)
-        return contentPackageDir.resolve("content-units.csv")
+        return contentPackageDir.resolve("content-units.json")
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     private fun readContentUnitsFromFile(
         unitFile: File,
         contentApp: ContentApp,
         contentAppVersion: String
-    ) = unitFile.readLines()
-        .mapIndexedNotNull { index, line ->
-            if (index in (0..1)) null
-            else {
-                val (unitId, icon, _) = line.split(";")
-                ContentUnit(
-                    contentApp,
-                    contentAppVersion,
-                    unitId,
-                    icon
-                )
-            }
-        }
+    ) = try {
+        unitFile.readText().let {
+            Json.decodeFromString<ContentUnitList>(it)
+        }.contentUnits.map {
+            ContentUnit(
+                contentApp,
+                contentAppVersion,
+                it.unitId,
+                it.icon
+            )
+        }.let { Result.Success(it) }
+    } catch (e: Throwable) {
+        Log.e("ContentPackageService", "Unable to read units.", e)
+        Result.Error("Unable to read units from content-units.json file. Error was: ${e.localizedMessage}")
+    }
 
     private fun extractPackageFile(uri: Uri): File {
         val extractionDir = context.cacheDir.resolve(UUID.randomUUID().toString())
@@ -117,16 +120,14 @@ class ContentPackageService @Inject constructor(
         return extractionDir
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     private fun readContentAppMetadata(extractionDir: File): ContentApp {
         val appMetadataJson = extractionDir.resolve("application-metadata.json")
-            .readText().let { Json.parseToJsonElement(it) }.jsonObject
+            .readText().let { Json.decodeFromString<ApplicationMetadata>(it) }
         return ContentApp(
-            appMetadataJson["applicationName"]?.jsonPrimitive?.content
-                ?: error("Malformed application-metadata.json file"),
-            appMetadataJson["applicationPackage"]?.jsonPrimitive?.content
-                ?: error("Malformed application-metadata.json file"),
-            appMetadataJson["unitLaunchActivityClass"]?.jsonPrimitive?.content
-                ?: error("Malformed application-metadata.json file")
+            appMetadataJson.applicationName,
+            appMetadataJson.applicationPackage,
+            appMetadataJson.unitLaunchActivityClass
         )
     }
 
@@ -140,3 +141,22 @@ class ContentPackageService @Inject constructor(
         extractionDir.deleteRecursively()
     }
 }
+
+@Serializable
+data class ApplicationMetadata(
+    val applicationName: String,
+    val applicationPackage: String,
+    val unitLaunchActivityClass: String
+)
+
+@Serializable
+data class ContentUnitList(
+    val contentUnits: List<ContentUnitDefinition>
+)
+
+@Serializable
+data class ContentUnitDefinition(
+    val unitId: String,
+    val icon: String,
+    val additionalAssets: List<String>
+)

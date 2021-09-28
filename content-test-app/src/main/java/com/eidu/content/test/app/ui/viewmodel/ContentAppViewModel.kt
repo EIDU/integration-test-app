@@ -58,7 +58,7 @@ class ContentAppViewModel @Inject constructor(
         return data
     }
 
-    fun loadUnitsFromCSVFile(
+    fun loadUnitsFromContentPackageUnitsFile(
         contentApp: ContentApp,
         clipboardService: ClipboardManager
     ): LiveData<Result<List<ContentUnit>>> {

@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
                                     val contentApp = app.result
                                     val unitLoadingState by remember {
                                         contentAppViewModel
-                                            .loadUnitsFromCSVFile(
+                                            .loadUnitsFromContentPackageUnitsFile(
                                                 contentApp,
                                                 clipboardService
                                             )
