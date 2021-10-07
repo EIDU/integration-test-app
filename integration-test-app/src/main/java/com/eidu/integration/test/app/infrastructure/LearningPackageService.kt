@@ -156,7 +156,6 @@ class LearningPackageService @Inject constructor(
 
 @Serializable
 data class ApplicationMetadata(
-    val applicationName: String,
     val applicationPackage: String,
     val unitLaunchActivityClass: String
 )
