@@ -32,17 +32,17 @@ fun EditLearningAppScreen(
     ) {
         var appState by remember { mutableStateOf(learningApp ?: LearningApp("", "", "")) }
         Column(Modifier.fillMaxWidth()) {
-            ContentAppTextField(
+            LearningAppTextField(
                 value = appState.name,
                 onValueChange = { appState = appState.copy(name = it) },
                 label = { Text("App name") },
             )
-            ContentAppTextField(
+            LearningAppTextField(
                 value = appState.packageName,
                 onValueChange = { appState = appState.copy(packageName = it) },
                 label = { Text("App package") },
             )
-            ContentAppTextField(
+            LearningAppTextField(
                 value = appState.launchClass,
                 onValueChange = { appState = appState.copy(launchClass = it) },
                 label = { Text("Unit launch activity class") },
@@ -57,14 +57,14 @@ fun EditLearningAppScreen(
                     .padding(10.dp, 10.dp)
             ) {
                 if (learningApp != null) Text("Save Changes")
-                else Text("Add Content App")
+                else Text("Add Learning App")
             }
         }
     }
 }
 
 @Composable
-private fun ContentAppTextField(
+private fun LearningAppTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: @Composable () -> Unit

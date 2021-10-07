@@ -161,5 +161,5 @@ private fun LearningUnitListErrorPreview() {
 }
 
 private fun sampleLearningUnits(): List<LearningUnit> = (1..20).map {
-    LearningUnit(SAMPLE_APP_1, "1.7.23", "Content-Unit-$it", "sample.png")
+    LearningUnit(SAMPLE_APP_1, "1.7.23", "Learning-Unit-$it", "sample.png")
 }
