@@ -95,7 +95,8 @@ fun LearningAppsScreen(
                 text = {
                     Text(
                         "Upload your learning package to the device (e.g. `adb push learning-package.zip" +
-                            " /sdcard/Download`) and add your app through 'Add learning package'"
+                            " /sdcard/Download`) and add your app through 'Add learning package' or" +
+                            " add an app manually if you don't have a learning package yet."
                     )
                 },
                 icon = { Icon(Icons.Default.Info, "How to add learning package") }
