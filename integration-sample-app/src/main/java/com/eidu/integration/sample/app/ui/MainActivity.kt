@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
@@ -76,7 +78,8 @@ class MainActivity : ComponentActivity() {
                     )
                 }
                 EiduScaffold(title = { Text("Run of ${requestDataState.learningUnitId}") }) {
-                    Column {
+                    val scrollState = ScrollState(0)
+                    Column(Modifier.verticalScroll(scrollState, true)) {
                         Card(
                             border = BorderStroke(1.dp, Color.LightGray),
                             modifier = Modifier.padding(5.dp)
