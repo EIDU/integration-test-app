@@ -34,8 +34,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.eidu.content.integration.RunContentUnitRequest
-import com.eidu.content.integration.RunContentUnitResult
+import com.eidu.integration.RunLearningUnitRequest
+import com.eidu.integration.RunLearningUnitResult
 import com.eidu.integration.sample.app.EIDUIntegrationSampleAppTheme
 import com.eidu.integration.sample.app.shared.EiduScaffold
 import java.util.Timer
@@ -49,13 +49,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val request: RunContentUnitRequest? = try {
-            RunContentUnitRequest.fromIntent(intent)
+        val request: RunLearningUnitRequest? = try {
+            RunLearningUnitRequest.fromIntent(intent)
         } catch (e: IllegalArgumentException) {
             Log.e("MainActivity", "onCreate: invalid launch intent: $intent", e)
             setResult(
                 RESULT_CANCELED,
-                RunContentUnitResult.ofError(
+                RunLearningUnitResult.ofError(
                     "unknown",
                     0L,
                     "Invalid Intent received: $intent",
@@ -141,7 +141,7 @@ class MainActivity : ComponentActivity() {
                                     text = { Text("Result Data") }
                                 )
                                 Column(Modifier.selectableGroup()) {
-                                    RunContentUnitResult.ResultType.values()
+                                    RunLearningUnitResult.ResultType.values()
                                         .forEach { result ->
                                             Row(
                                                 Modifier
@@ -170,7 +170,7 @@ class MainActivity : ComponentActivity() {
                                             }
                                         }
                                 }
-                                if (requestDataState.resultType == RunContentUnitResult.ResultType.Success) {
+                                if (requestDataState.resultType != RunLearningUnitResult.ResultType.Error) {
                                     Row {
                                         ListItem(
                                             text = { Text("${requestDataState.score}") },
@@ -192,7 +192,7 @@ class MainActivity : ComponentActivity() {
                                     text = { Text("${requestDataState.foregroundTimeInMs}") },
                                     secondaryText = { Text("Foreground Time") }
                                 )
-                                if (requestDataState.resultType == RunContentUnitResult.ResultType.Error) {
+                                if (requestDataState.resultType == RunLearningUnitResult.ResultType.Error) {
                                     OutlinedTextField(
                                         value = requestDataState.errorDetails,
                                         onValueChange = {
