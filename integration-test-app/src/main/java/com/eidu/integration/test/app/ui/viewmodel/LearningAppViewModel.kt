@@ -13,8 +13,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
-import com.eidu.content.integration.RunContentUnitRequest
-import com.eidu.content.integration.RunContentUnitResult
+import com.eidu.integration.RunLearningUnitRequest
+import com.eidu.integration.RunLearningUnitResult
 import com.eidu.integration.test.app.infrastructure.LearningPackageService
 import com.eidu.integration.test.app.model.LearningApp
 import com.eidu.integration.test.app.model.LearningUnit
@@ -31,7 +31,7 @@ class LearningAppViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _learningUnits = MutableLiveData<Result<List<LearningUnit>>>(Result.Loading)
-    private val _learningAppResult = MutableLiveData<Result<RunContentUnitResult>>()
+    private val _learningAppResult = MutableLiveData<Result<RunLearningUnitResult>>()
 
     fun getLearningApps(): LiveData<List<LearningApp>> = learningAppDao.getAll()
 
@@ -83,7 +83,7 @@ class LearningAppViewModel @Inject constructor(
             else -> {
                 val resultIntent = activityResult.data ?: error("This shouldn't be null here.")
                 try {
-                    val resultData = RunContentUnitResult.fromIntent(resultIntent)
+                    val resultData = RunLearningUnitResult.fromIntent(resultIntent)
                     _learningAppResult.postValue(Result.Success(resultData))
                 } catch (e: IllegalArgumentException) {
                     _learningAppResult.postValue(
@@ -104,7 +104,7 @@ class LearningAppViewModel @Inject constructor(
         }
     }
 
-    fun getLearningAppResult(): LiveData<Result<RunContentUnitResult>> = _learningAppResult
+    fun getLearningAppResult(): LiveData<Result<RunLearningUnitResult>> = _learningAppResult
 
     fun launchLearningAppUnit(
         context: Context,
@@ -137,7 +137,7 @@ class LearningAppViewModel @Inject constructor(
     }
 
     private fun getLaunchIntent(learningApp: LearningApp, learningUnit: LearningUnit) =
-        RunContentUnitRequest.of(
+        RunLearningUnitRequest.of(
             learningUnit.unitId,
             "Test Run",
             "Test Learner",

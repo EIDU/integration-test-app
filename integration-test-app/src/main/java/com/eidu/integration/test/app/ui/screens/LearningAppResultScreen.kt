@@ -10,10 +10,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.eidu.content.integration.RunContentUnitResult
+import com.eidu.integration.RunLearningUnitResult
 import com.eidu.integration.test.app.model.LearningApp
-import com.eidu.integration.test.app.ui.shared.LearningAppErrorDisplay
 import com.eidu.integration.test.app.ui.shared.EiduScaffold
+import com.eidu.integration.test.app.ui.shared.LearningAppErrorDisplay
 import com.eidu.integration.test.app.ui.shared.LoadingIndicator
 import com.eidu.integration.test.app.ui.shared.SAMPLE_APP_1
 import com.eidu.integration.test.app.ui.viewmodel.Result
@@ -21,7 +21,7 @@ import com.eidu.integration.test.app.ui.viewmodel.Result
 @Composable
 fun LearningAppResultScreen(
     learningApp: LearningApp,
-    learningAppResult: Result<RunContentUnitResult>,
+    learningAppResult: Result<RunLearningUnitResult>,
     copyToClipboard: (String, String) -> Unit,
     goToEditScreen: () -> Unit,
     goBack: () -> Unit
@@ -35,12 +35,12 @@ fun LearningAppResultScreen(
                 with(learningAppResult.result) {
                     ResultFields(
                         fields = mapOf(
-                            "Learning Unit ID" to contentId,
+                            "Learning Unit ID" to learningUnitId,
                             "Result" to resultType.toString(),
-                            "Score" to (if (resultType == RunContentUnitResult.ResultType.Success) "$score" else null),
+                            "Score" to (if (resultType == RunLearningUnitResult.ResultType.Success) "$score" else null),
                             "Foreground duration" to "$foregroundDurationInMs",
                             "Additional data" to "$additionalData",
-                            "Error Details" to (if (resultType == RunContentUnitResult.ResultType.Error) "$errorDetails" else null)
+                            "Error Details" to (if (resultType == RunLearningUnitResult.ResultType.Error) "$errorDetails" else null)
                         ),
                         copyToClipboard
                     )
@@ -88,7 +88,7 @@ private fun LearningAppResultScreenPreview() {
     LearningAppResultScreen(
         SAMPLE_APP_1,
         Result.Success(
-            RunContentUnitResult.ofSuccess(
+            RunLearningUnitResult.ofSuccess(
                 "03.EIDU.FishTank",
                 1.0f,
                 48_735,
