@@ -1,6 +1,6 @@
 object Apps {
-    const val testApplicationId = "com.eidu.content.test.app"
-    const val sampleApplicationId = "com.eidu.content.sample.app"
+    const val testApplicationId = "com.eidu.integration.test.app"
+    const val sampleApplicationId = "com.eidu.integration.sample.app"
     const val compileSdk = 31
     const val minSdk = 21
     const val targetSdk = 31
