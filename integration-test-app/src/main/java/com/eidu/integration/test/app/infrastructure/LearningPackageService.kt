@@ -123,11 +123,24 @@ class LearningPackageService @Inject constructor(
     private fun readLearningAppMetadata(extractionDir: File): LearningApp {
         val appMetadataJson = extractionDir.resolve("application-metadata.json")
             .readText().let { Json.decodeFromString<ApplicationMetadata>(it) }
+        val applicationName =
+            extractionDir.list { _, fileName -> fileName.endsWith("apk") }?.firstOrNull()?.let {
+                getApplicationLabelFromApk(extractionDir.resolve(it).path)
+            }
         return LearningApp(
-            appMetadataJson.applicationName,
+            applicationName ?: "Unknown Application",
             appMetadataJson.applicationPackage,
             appMetadataJson.unitLaunchActivityClass
         )
+    }
+
+    private fun getApplicationLabelFromApk(apkFilePath: String): String? {
+        return context.packageManager.getPackageArchiveInfo(apkFilePath, 0)?.also {
+            it.applicationInfo.sourceDir = apkFilePath
+            it.applicationInfo.publicSourceDir = apkFilePath
+        }?.let {
+            context.packageManager.getApplicationLabel(it.applicationInfo).toString()
+        }
     }
 
     private fun copyPackageContentToInternalFiles(
