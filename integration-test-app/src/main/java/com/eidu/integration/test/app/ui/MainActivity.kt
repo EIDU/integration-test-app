@@ -52,19 +52,19 @@ class MainActivity : ComponentActivity() {
             val goBack: () -> Unit = { navController.navigateUp() }
             EIDUIntegrationTestAppTheme {
                 Surface(color = MaterialTheme.colors.background) {
-                    NavHost(navController = navController, startDestination = "content-apps") {
-                        composable("content-apps") {
+                    NavHost(navController = navController, startDestination = "learning-apps") {
+                        composable("learning-apps") {
                             val learningApps =
                                 learningAppViewModel.getLearningApps().observeAsState(listOf())
 
                             LearningAppsScreen(
                                 learningApps.value,
-                                { learningApp -> navController.navigate("content-apps/${learningApp.name}/units") },
+                                { learningApp -> navController.navigate("learning-apps/${learningApp.name}/units") },
                                 { learningApp -> learningAppViewModel.deleteLearningApp(learningApp) },
                                 { packageFilePicker.launch(arrayOf("application/zip")) }
                             )
                         }
-                        composable("content-apps/{app}/units") { backStackEntry ->
+                        composable("learning-apps/{app}/units") { backStackEntry ->
                             when (val app: Result<LearningApp> = getAppNameState(backStackEntry)) {
                                 is Result.Loading -> CircularProgressIndicator()
                                 is Result.Success -> {
@@ -90,18 +90,18 @@ class MainActivity : ComponentActivity() {
                                             )
                                         },
                                         {
-                                            navController.navigate("content-apps/${learningApp.name}/edit")
+                                            navController.navigate("learning-apps/${learningApp.name}/edit")
                                         },
                                         goBack
                                     )
                                 }
-                                is Result.NotFound -> navController.navigate("content-apps")
+                                is Result.NotFound -> navController.navigate("learning-apps")
                             }
                         }
-                        composable("content-apps/{app}/result") { backStackEntry ->
+                        composable("learning-apps/{app}/result") { backStackEntry ->
                             when (val app: Result<LearningApp> = getAppNameState(backStackEntry)) {
                                 is Result.Loading -> CircularProgressIndicator()
-                                is Result.NotFound -> navController.navigate("content-apps")
+                                is Result.NotFound -> navController.navigate("learning-apps")
                                 is Result.Success -> {
                                     val appResult = learningAppViewModel.getLearningAppResult()
                                         .observeAsState(initial = Result.Loading)
@@ -118,7 +118,7 @@ class MainActivity : ComponentActivity() {
                                             copyToClipboardToast.show()
                                         },
                                         {
-                                            navController.navigate("content-apps/${app.result.name}/edit")
+                                            navController.navigate("learning-apps/${app.result.name}/edit")
                                         },
                                         goBack
                                     )

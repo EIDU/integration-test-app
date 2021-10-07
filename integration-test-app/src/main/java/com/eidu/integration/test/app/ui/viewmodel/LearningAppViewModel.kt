@@ -118,7 +118,7 @@ class LearningAppViewModel @Inject constructor(
             learningApp,
             learningUnit
         )
-        navController.navigate("content-apps/${learningApp.name}/result")
+        navController.navigate("learning-apps/${learningApp.name}/result")
         if (context.packageManager.resolveActivity(launchIntent, 0) != null) {
             learningAppLauncher.launch(launchIntent)
         } else {
