@@ -16,13 +16,8 @@
             android:label="@string/title_activity_main"
             android:theme="@style/Theme.EIDULearningSampleApp.NoActionBar">
             <intent-filter>
-                <action android:name="com.eidu.content.launch.LAUNCH_CONTENT" />
+                <action android:name="com.eidu.integration.LAUNCH_LEARNING_UNIT" />
                 <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>
