@@ -37,7 +37,7 @@ fun LearningAppResultScreen(
                         fields = mapOf(
                             "Learning Unit ID" to learningUnitId,
                             "Result" to resultType.toString(),
-                            "Score" to (if (resultType == RunLearningUnitResult.ResultType.Success) "$score" else null),
+                            "Score" to (if (resultType != RunLearningUnitResult.ResultType.Error) "$score" else null),
                             "Foreground duration" to "$foregroundDurationInMs",
                             "Additional data" to "$additionalData",
                             "Error Details" to (if (resultType == RunLearningUnitResult.ResultType.Error) "$errorDetails" else null)
