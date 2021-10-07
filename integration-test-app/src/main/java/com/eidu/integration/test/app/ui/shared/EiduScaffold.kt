@@ -13,7 +13,7 @@ import androidx.compose.runtime.Composable
 
 @Composable
 fun EiduScaffold(
-    title: @Composable () -> Unit = { Text(text = "EIDU Content Test App") },
+    title: @Composable () -> Unit = { Text(text = "EIDU Integration Test App") },
     floatingAction: @Composable () -> Unit = {},
     bottomBarActions: @Composable (RowScope.() -> Unit)? = null,
     goBack: (() -> Unit)? = null,

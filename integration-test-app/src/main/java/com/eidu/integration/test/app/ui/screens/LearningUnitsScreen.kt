@@ -20,9 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.eidu.integration.test.app.model.ContentApp
-import com.eidu.integration.test.app.model.ContentUnit
-import com.eidu.integration.test.app.ui.shared.ContentAppErrorDisplay
+import com.eidu.integration.test.app.model.LearningApp
+import com.eidu.integration.test.app.model.LearningUnit
+import com.eidu.integration.test.app.ui.shared.LearningAppErrorDisplay
 import com.eidu.integration.test.app.ui.shared.EiduScaffold
 import com.eidu.integration.test.app.ui.shared.LoadingIndicator
 import com.eidu.integration.test.app.ui.shared.SAMPLE_APP_1
@@ -30,21 +30,21 @@ import com.eidu.integration.test.app.ui.viewmodel.Result
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ContentUnitsScreen(
-    contentApp: ContentApp,
-    contentUnits: Result<List<ContentUnit>>,
-    runUnit: (ContentUnit) -> Unit,
+fun LearningUnitsScreen(
+    learningApp: LearningApp,
+    learningUnits: Result<List<LearningUnit>>,
+    runUnit: (LearningUnit) -> Unit,
     goToEditScreen: () -> Unit,
     goBack: () -> Unit
 ) {
     EiduScaffold(
-        title = { Text(text = "${contentApp.name} Units") },
+        title = { Text(text = "${learningApp.name} Units") },
         goBack = goBack
     ) {
-        when (contentUnits) {
+        when (learningUnits) {
             is Result.Success -> LazyColumn {
-                items(contentUnits.result, { it.toString() }) {
-                    ContentUnitRow(contentUnit = it) { runUnit(it) }
+                items(learningUnits.result, { it.toString() }) {
+                    LearningUnitRow(learningUnit = it) { runUnit(it) }
                     Divider()
                 }
             }
@@ -52,7 +52,7 @@ fun ContentUnitsScreen(
                 LoadingIndicator()
             is Result.NotFound ->
                 ListItem(
-                    text = { Text("No units found for app. Did your app return them?") },
+                    text = { Text("No units found for app.") },
                     icon = {
                         Icon(
                             imageVector = Icons.Default.WarningAmber,
@@ -61,9 +61,9 @@ fun ContentUnitsScreen(
                     }
                 )
             is Result.Error ->
-                ContentAppErrorDisplay(
-                    error = contentUnits,
-                    contentApp = contentApp,
+                LearningAppErrorDisplay(
+                    error = learningUnits,
+                    learningApp = learningApp,
                     navigateToEditScreen = goToEditScreen
                 )
         }
@@ -72,15 +72,15 @@ fun ContentUnitsScreen(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ContentUnitRow(contentUnit: ContentUnit, runUnit: () -> Unit) {
+fun LearningUnitRow(learningUnit: LearningUnit, runUnit: () -> Unit) {
     ListItem(
         Modifier.clickable { runUnit() },
-        text = { Text(contentUnit.unitId) },
+        text = { Text(learningUnit.unitId) },
         secondaryText = {
             Row {
-                Text(contentUnit.contentApp.name, fontWeight = FontWeight.ExtraBold)
+                Text(learningUnit.learningApp.name, fontWeight = FontWeight.ExtraBold)
                 Spacer(modifier = Modifier.width(5.dp))
-                Text(contentUnit.contentAppVersion)
+                Text(learningUnit.learningAppVersion)
             }
         },
         trailing = {
@@ -93,28 +93,28 @@ fun ContentUnitRow(contentUnit: ContentUnit, runUnit: () -> Unit) {
 
 @Preview(showBackground = true)
 @Composable
-private fun ContentUnitListPreview() {
-    ContentUnitsScreen(SAMPLE_APP_1, Result.Success(sampleContentUnits()), {}, {}, {})
+private fun LearningUnitListPreview() {
+    LearningUnitsScreen(SAMPLE_APP_1, Result.Success(sampleLearningUnits()), {}, {}, {})
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun ContentUnitListLoadingPreview() {
-    ContentUnitsScreen(SAMPLE_APP_1, Result.Loading, {}, {}, {})
+private fun LearningUnitListLoadingPreview() {
+    LearningUnitsScreen(SAMPLE_APP_1, Result.Loading, {}, {}, {})
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun ContentUnitListNotFoundPreview() {
-    ContentUnitsScreen(SAMPLE_APP_1, Result.NotFound, {}, {}, {})
+private fun LearningUnitListNotFoundPreview() {
+    LearningUnitsScreen(SAMPLE_APP_1, Result.NotFound, {}, {}, {})
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun ContentUnitListErrorPreview() {
-    ContentUnitsScreen(SAMPLE_APP_1, Result.Error("Error"), {}, {}, {})
+private fun LearningUnitListErrorPreview() {
+    LearningUnitsScreen(SAMPLE_APP_1, Result.Error("Error"), {}, {}, {})
 }
 
-private fun sampleContentUnits(): List<ContentUnit> = (1..20).map {
-    ContentUnit(SAMPLE_APP_1, "1.7.23", "Content-Unit-$it", "sample.png")
+private fun sampleLearningUnits(): List<LearningUnit> = (1..20).map {
+    LearningUnit(SAMPLE_APP_1, "1.7.23", "Content-Unit-$it", "sample.png")
 }

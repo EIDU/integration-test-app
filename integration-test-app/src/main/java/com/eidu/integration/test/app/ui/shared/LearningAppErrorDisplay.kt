@@ -16,14 +16,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.eidu.integration.test.app.model.ContentApp
+import com.eidu.integration.test.app.model.LearningApp
 import com.eidu.integration.test.app.ui.viewmodel.Result
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ContentAppErrorDisplay(
+fun LearningAppErrorDisplay(
     error: Result.Error,
-    contentApp: ContentApp,
+    learningApp: LearningApp,
     navigateToEditScreen: () -> Unit
 ) {
     Column {
@@ -56,7 +56,7 @@ fun ContentAppErrorDisplay(
 @Composable
 private fun ErrorPreview() {
     EiduScaffold {
-        ContentAppErrorDisplay(
+        LearningAppErrorDisplay(
             error = Result.Error("Unable to do stuff."),
             SAMPLE_APP_1
         ) {}

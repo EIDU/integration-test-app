@@ -30,48 +30,48 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
-import com.eidu.integration.test.app.model.ContentApp
+import com.eidu.integration.test.app.model.LearningApp
 import com.eidu.integration.test.app.ui.shared.EiduScaffold
 import com.eidu.integration.test.app.ui.shared.SAMPLE_APP_1
 import com.eidu.integration.test.app.ui.shared.SAMPLE_APP_2
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ContentAppsScreen(
-    contentApps: List<ContentApp>,
-    navigateToUnits: (app: ContentApp) -> Unit,
-    deleteContentApp: (app: ContentApp) -> Unit,
+fun LearningAppsScreen(
+    learningApps: List<LearningApp>,
+    navigateToUnits: (app: LearningApp) -> Unit,
+    deleteLearningApp: (app: LearningApp) -> Unit,
     openFilePicker: () -> Unit
 ) {
     EiduScaffold(
         floatingAction = {
             ExtendedFloatingActionButton(
                 onClick = openFilePicker,
-                text = { Text(text = "Add content package") },
+                text = { Text(text = "Add learning package") },
                 icon = {
                     Icon(imageVector = Icons.Rounded.Add, contentDescription = "Add App")
                 }
             )
         },
-        title = { Text("Content Apps") }
+        title = { Text("Learning Apps") }
     ) {
         Column {
             ListItem(
                 text = {
                     Text(
-                        "Upload your content package to the device (e.g. `adb push content-package.zip" +
-                            " /sdcard/Download`) and add your app through 'Add content package'"
+                        "Upload your learning package to the device (e.g. `adb push learning-package.zip" +
+                            " /sdcard/Download`) and add your app through 'Add learning package'"
                     )
                 },
-                icon = { Icon(Icons.Default.Info, "How to add content package") }
+                icon = { Icon(Icons.Default.Info, "How to add learning package") }
             )
             Divider()
             LazyColumn {
-                items(contentApps, { it.toString() }) {
-                    ContentAppRow(
-                        contentApp = it,
+                items(learningApps, { it.toString() }) {
+                    LearningAppRow(
+                        learningApp = it,
                         { -> navigateToUnits(it) },
-                        { -> deleteContentApp(it) }
+                        { -> deleteLearningApp(it) }
                     )
                     Divider()
                 }
@@ -82,10 +82,10 @@ fun ContentAppsScreen(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ContentAppRow(
-    contentApp: ContentApp,
+fun LearningAppRow(
+    learningApp: LearningApp,
     navigateToUnits: () -> Unit,
-    deleteContentApp: () -> Unit
+    deleteLearningApp: () -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth()
@@ -93,8 +93,8 @@ fun ContentAppRow(
         var dropdownOpen by remember { mutableStateOf(false) }
         ListItem(
             modifier = Modifier.clickable { navigateToUnits() },
-            text = { Text(contentApp.name) },
-            secondaryText = { Text(contentApp.packageName) },
+            text = { Text(learningApp.name) },
+            secondaryText = { Text(learningApp.packageName) },
             trailing = {
                 Box {
                     IconButton(onClick = { dropdownOpen = true }) {
@@ -107,7 +107,7 @@ fun ContentAppRow(
                         expanded = dropdownOpen,
                         onDismissRequest = { dropdownOpen = false }
                     ) {
-                        DropdownMenuItem(onClick = deleteContentApp) {
+                        DropdownMenuItem(onClick = deleteLearningApp) {
                             Icon(
                                 imageVector = Icons.Rounded.Delete,
                                 contentDescription = "Delete App"
@@ -130,11 +130,11 @@ fun ContentAppRow(
 
 @Preview(showBackground = true, device = Devices.NEXUS_5)
 @Composable
-private fun ContentAppScreenPreview() {
-    ContentAppsScreen(
-        contentApps = listOf(SAMPLE_APP_1, SAMPLE_APP_2),
+private fun LearningAppScreenPreview() {
+    LearningAppsScreen(
+        learningApps = listOf(SAMPLE_APP_1, SAMPLE_APP_2),
         navigateToUnits = {},
-        deleteContentApp = {},
+        deleteLearningApp = {},
         openFilePicker = {}
     )
 }

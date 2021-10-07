@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.eidu.integration.test.app.model.persistence.ContentAppDao
+import com.eidu.integration.test.app.model.persistence.LearningAppDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,14 +21,14 @@ class DatabaseModule {
         return Room.databaseBuilder(
             appContext,
             AppDatabase::class.java,
-            "EIDU Content Apps"
+            "EIDU Learning Apps"
         ).addMigrations(
             MIGRATION_1_2
         ).build()
     }
 
     @Provides
-    fun contentAppDao(appDatabase: AppDatabase): ContentAppDao = appDatabase.contentAppDao()
+    fun learningAppDao(appDatabase: AppDatabase): LearningAppDao = appDatabase.learningAppDao()
 
     companion object {
         private val MIGRATION_1_2 = object : Migration(1, 2) {

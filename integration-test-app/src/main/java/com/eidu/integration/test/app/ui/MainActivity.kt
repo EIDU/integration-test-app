@@ -21,25 +21,25 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.eidu.integration.test.app.model.ContentApp
-import com.eidu.integration.test.app.ui.screens.ContentAppResultScreen
-import com.eidu.integration.test.app.ui.screens.ContentAppsScreen
-import com.eidu.integration.test.app.ui.screens.ContentUnitsScreen
-import com.eidu.integration.test.app.ui.theme.EIDUContentTestAppTheme
-import com.eidu.integration.test.app.ui.viewmodel.ContentAppViewModel
+import com.eidu.integration.test.app.model.LearningApp
+import com.eidu.integration.test.app.ui.screens.LearningAppResultScreen
+import com.eidu.integration.test.app.ui.screens.LearningAppsScreen
+import com.eidu.integration.test.app.ui.screens.LearningUnitsScreen
+import com.eidu.integration.test.app.ui.theme.EIDUIntegrationTestAppTheme
+import com.eidu.integration.test.app.ui.viewmodel.LearningAppViewModel
 import com.eidu.integration.test.app.ui.viewmodel.Result
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private val contentAppViewModel: ContentAppViewModel by viewModels()
+    private val learningAppViewModel: LearningAppViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val contentAppLauncher = registerForActivityResult(
+        val learningAppLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult(),
-            ::handleContentAppResult
+            ::handleLearningAppResult
         )
         val packageFilePicker = registerForActivityResult(
             ActivityResultContracts.OpenDocument(),
@@ -50,47 +50,47 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             val goBack: () -> Unit = { navController.navigateUp() }
-            EIDUContentTestAppTheme {
+            EIDUIntegrationTestAppTheme {
                 Surface(color = MaterialTheme.colors.background) {
                     NavHost(navController = navController, startDestination = "content-apps") {
                         composable("content-apps") {
-                            val contentApps =
-                                contentAppViewModel.getContentApps().observeAsState(listOf())
+                            val learningApps =
+                                learningAppViewModel.getLearningApps().observeAsState(listOf())
 
-                            ContentAppsScreen(
-                                contentApps.value,
-                                { contentApp -> navController.navigate("content-apps/${contentApp.name}/units") },
-                                { contentApp -> contentAppViewModel.deleteContentApp(contentApp) },
+                            LearningAppsScreen(
+                                learningApps.value,
+                                { learningApp -> navController.navigate("content-apps/${learningApp.name}/units") },
+                                { learningApp -> learningAppViewModel.deleteLearningApp(learningApp) },
                                 { packageFilePicker.launch(arrayOf("application/zip")) }
                             )
                         }
                         composable("content-apps/{app}/units") { backStackEntry ->
-                            when (val app: Result<ContentApp> = getAppNameState(backStackEntry)) {
+                            when (val app: Result<LearningApp> = getAppNameState(backStackEntry)) {
                                 is Result.Loading -> CircularProgressIndicator()
                                 is Result.Success -> {
-                                    val contentApp = app.result
+                                    val learningApp = app.result
                                     val unitLoadingState by remember {
-                                        contentAppViewModel
-                                            .loadUnitsFromContentPackageUnitsFile(
-                                                contentApp,
+                                        learningAppViewModel
+                                            .loadUnitsFromLearningPackageUnitsFile(
+                                                learningApp,
                                                 clipboardService
                                             )
                                     }.observeAsState(initial = Result.Loading)
 
-                                    ContentUnitsScreen(
-                                        contentApp = contentApp,
-                                        contentUnits = unitLoadingState,
+                                    LearningUnitsScreen(
+                                        learningApp = learningApp,
+                                        learningUnits = unitLoadingState,
                                         { unit ->
-                                            contentAppViewModel.launchContentAppUnit(
+                                            learningAppViewModel.launchLearningAppUnit(
                                                 applicationContext,
-                                                contentApp,
+                                                learningApp,
                                                 unit,
-                                                contentAppLauncher,
+                                                learningAppLauncher,
                                                 navController
                                             )
                                         },
                                         {
-                                            navController.navigate("content-apps/${contentApp.name}/edit")
+                                            navController.navigate("content-apps/${learningApp.name}/edit")
                                         },
                                         goBack
                                     )
@@ -99,15 +99,15 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         composable("content-apps/{app}/result") { backStackEntry ->
-                            when (val app: Result<ContentApp> = getAppNameState(backStackEntry)) {
+                            when (val app: Result<LearningApp> = getAppNameState(backStackEntry)) {
                                 is Result.Loading -> CircularProgressIndicator()
                                 is Result.NotFound -> navController.navigate("content-apps")
                                 is Result.Success -> {
-                                    val appResult = contentAppViewModel.getContentAppResult()
+                                    val appResult = learningAppViewModel.getLearningAppResult()
                                         .observeAsState(initial = Result.Loading)
-                                    ContentAppResultScreen(
-                                        contentApp = app.result,
-                                        contentAppResult = appResult.value,
+                                    LearningAppResultScreen(
+                                        learningApp = app.result,
+                                        learningAppResult = appResult.value,
                                         { label, text ->
                                             clipboardService.setPrimaryClip(
                                                 ClipData.newPlainText(
@@ -131,22 +131,22 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun handleContentAppResult(activityResult: ActivityResult) {
-        contentAppViewModel.processUnitRunResult(activityResult)
+    private fun handleLearningAppResult(activityResult: ActivityResult) {
+        learningAppViewModel.processUnitRunResult(activityResult)
     }
 
     private fun handleFilePicked(uri: Uri?) {
         if (uri != null) {
-            contentAppViewModel.handleContentPackageFile(uri)
+            learningAppViewModel.handleLearningPackageFile(uri)
         }
     }
 
     @Composable
-    private fun getAppNameState(backStackEntry: NavBackStackEntry): Result<ContentApp> {
+    private fun getAppNameState(backStackEntry: NavBackStackEntry): Result<LearningApp> {
         val appName = backStackEntry.arguments?.getString("app")
             ?: error("No app name specified")
-        val app: Result<ContentApp> by remember {
-            contentAppViewModel.getContentAppByName(appName)
+        val app: Result<LearningApp> by remember {
+            learningAppViewModel.getLearningAppByName(appName)
         }.observeAsState(initial = Result.Loading)
         return app
     }

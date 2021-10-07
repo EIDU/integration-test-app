@@ -7,8 +7,8 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
-import com.eidu.integration.test.app.model.ContentApp
-import com.eidu.integration.test.app.model.ContentUnit
+import com.eidu.integration.test.app.model.LearningApp
+import com.eidu.integration.test.app.model.LearningUnit
 import com.eidu.integration.test.app.ui.viewmodel.Result
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -22,79 +22,78 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ContentPackageService @Inject constructor(
+class LearningPackageService @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
 
-    fun getContentUnits(
-        contentApp: ContentApp,
+    fun getLearningUnits(
+        learningApp: LearningApp,
         clipboardService: ClipboardManager
-    ): Result<List<ContentUnit>> {
-        val unitFile = getContentAppUnitFile(contentApp)
-        val contentAppVersion = getContentAppVersion(context, contentApp)
+    ): Result<List<LearningUnit>> {
+        val unitFile = getLearningAppUnitFile(learningApp)
+        val learningAppVersion = getLearningAppVersion(context, learningApp)
         return if (!unitFile.exists()) {
             clipboardService.setPrimaryClip(ClipData.newPlainText("Unit File", unitFile.path))
             Result.Error(
-                "Units file ${unitFile.path} does not exist. The path was copied to your " +
-                    "clipboard so you can push it using 'adb push content-units.csv ${unitFile.path}'"
+                "Units file ${unitFile.path} does not exist. Have you uploaded a complete and correct learning package?"
             )
-        } else if (contentAppVersion == null) {
-            Result.Error("Unable to determine content app version")
+        } else if (learningAppVersion == null) {
+            Result.Error("Unable to determine learning app version")
         } else {
-            readContentUnitsFromFile(unitFile, contentApp, contentAppVersion)
+            readLearningUnitsFromFile(unitFile, learningApp, learningAppVersion)
         }
     }
 
-    fun loadContentAppFromContentPackage(uri: Uri): ContentApp {
+    fun loadLearningAppFromLearningPackage(uri: Uri): LearningApp {
         val extractionDir = extractPackageFile(uri)
-        val contentApp = readContentAppMetadata(extractionDir)
-        copyPackageContentToInternalFiles(contentApp, extractionDir)
-        return contentApp
+        val learningApp = readLearningAppMetadata(extractionDir)
+        copyPackageContentToInternalFiles(learningApp, extractionDir)
+        return learningApp
     }
 
     private fun getInternalFilesDir(
         context: Context,
-        contentApp: ContentApp
-    ) = context.filesDir.resolve(contentApp.packageName)
+        learningApp: LearningApp
+    ) = context.filesDir.resolve(learningApp.packageName)
 
-    private fun getContentAppVersion(context: Context, contentApp: ContentApp): String? =
-        getContentAppInfo(context, contentApp)?.versionName
+    private fun getLearningAppVersion(context: Context, learningApp: LearningApp): String? =
+        getLearningAppInfo(context, learningApp)?.versionName
 
-    private fun getContentAppInfo(context: Context, contentApp: ContentApp): PackageInfo? =
+    private fun getLearningAppInfo(context: Context, learningApp: LearningApp): PackageInfo? =
         try {
-            context.packageManager.getPackageInfo(contentApp.packageName, 0)
+            context.packageManager.getPackageInfo(learningApp.packageName, 0)
         } catch (e: PackageManager.NameNotFoundException) {
             Log.e(
-                "ContentAppViewModel",
-                "getContentAppInfo: unable to query content info for package ${contentApp.packageName}",
+                "LearningAppViewModel",
+                "getLearningAppInfo: unable to query learning app info for package ${learningApp.packageName}",
                 e
             )
             null
         }
 
-    private fun getContentAppUnitFile(contentApp: ContentApp): File {
-        val contentPackageDir = getInternalFilesDir(context, contentApp)
-        return contentPackageDir.resolve("content-units.json")
+    private fun getLearningAppUnitFile(learningApp: LearningApp): File {
+        val learningPackageDir = getInternalFilesDir(context, learningApp)
+        return learningPackageDir.resolve("content-units.json")
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    private fun readContentUnitsFromFile(
+    private fun readLearningUnitsFromFile(
         unitFile: File,
-        contentApp: ContentApp,
-        contentAppVersion: String
+        learningApp: LearningApp,
+        learningAppVersion: String
     ) = try {
         unitFile.readText().let {
-            Json.decodeFromString<ContentUnitList>(it)
-        }.contentUnits.map {
-            ContentUnit(
-                contentApp,
-                contentAppVersion,
+            Json.decodeFromString<LearningUnitList>(it)
+        }.learningUnits.map {
+            LearningUnit(
+                learningApp,
+                learningAppVersion,
                 it.unitId,
                 it.icon
             )
         }.let { Result.Success(it) }
     } catch (e: Throwable) {
-        Log.e("ContentPackageService", "Unable to read units.", e)
+        Log.e("LearningPackageService", "Unable to read units.", e)
         Result.Error("Unable to read units from content-units.json file. Error was: ${e.localizedMessage}")
     }
 
@@ -106,10 +105,10 @@ class ContentPackageService @Inject constructor(
             var entry = stream.nextEntry
             while (entry != null) {
                 if (entry.isDirectory) {
-                    Log.i("ContentAppViewModel", "Extracting directory ${entry.name}")
+                    Log.i("LearningPackageService", "Extracting directory ${entry.name}")
                     extractionDir.resolve(entry.name).mkdirs()
                 } else {
-                    Log.i("ContentAppViewModel", "Extracting file ${entry.name}")
+                    Log.i("LearningPackageService", "Extracting file ${entry.name}")
                     val extractTo = extractionDir.resolve(entry.name)
                     stream.copyTo(extractTo.outputStream())
                 }
@@ -121,10 +120,10 @@ class ContentPackageService @Inject constructor(
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    private fun readContentAppMetadata(extractionDir: File): ContentApp {
+    private fun readLearningAppMetadata(extractionDir: File): LearningApp {
         val appMetadataJson = extractionDir.resolve("application-metadata.json")
             .readText().let { Json.decodeFromString<ApplicationMetadata>(it) }
-        return ContentApp(
+        return LearningApp(
             appMetadataJson.applicationName,
             appMetadataJson.applicationPackage,
             appMetadataJson.unitLaunchActivityClass
@@ -132,12 +131,12 @@ class ContentPackageService @Inject constructor(
     }
 
     private fun copyPackageContentToInternalFiles(
-        contentApp: ContentApp,
+        learningApp: LearningApp,
         extractionDir: File
     ) {
-        val internalContentAppDir = getInternalFilesDir(context, contentApp)
-        internalContentAppDir.mkdirs()
-        extractionDir.copyRecursively(internalContentAppDir, overwrite = true)
+        val internalLearningAppDir = getInternalFilesDir(context, learningApp)
+        internalLearningAppDir.mkdirs()
+        extractionDir.copyRecursively(internalLearningAppDir, overwrite = true)
         extractionDir.deleteRecursively()
     }
 }
@@ -150,12 +149,12 @@ data class ApplicationMetadata(
 )
 
 @Serializable
-data class ContentUnitList(
-    val contentUnits: List<ContentUnitDefinition>
+data class LearningUnitList(
+    val learningUnits: List<LearningUnitDefinition>
 )
 
 @Serializable
-data class ContentUnitDefinition(
+data class LearningUnitDefinition(
     val unitId: String,
     val icon: String,
     val additionalAssets: List<String>

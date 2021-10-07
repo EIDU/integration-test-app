@@ -6,19 +6,19 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy.REPLACE
 import androidx.room.Query
-import com.eidu.integration.test.app.model.ContentApp
+import com.eidu.integration.test.app.model.LearningApp
 
 @Dao
-interface ContentAppDao {
+interface LearningAppDao {
     @Query("SELECT * FROM content_apps")
-    fun getAll(): LiveData<List<ContentApp>>
+    fun getAll(): LiveData<List<LearningApp>>
 
     @Query("SELECT * FROM content_apps WHERE name = :name")
-    suspend fun findByName(name: String): ContentApp?
+    suspend fun findByName(name: String): LearningApp?
 
     @Insert(onConflict = REPLACE)
-    fun upsert(contentApp: ContentApp)
+    fun upsert(learningApp: LearningApp)
 
     @Delete
-    fun delete(contentApp: ContentApp)
+    fun delete(learningApp: LearningApp)
 }

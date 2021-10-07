@@ -11,31 +11,31 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.eidu.content.integration.RunContentUnitResult
-import com.eidu.integration.test.app.model.ContentApp
-import com.eidu.integration.test.app.ui.shared.ContentAppErrorDisplay
+import com.eidu.integration.test.app.model.LearningApp
+import com.eidu.integration.test.app.ui.shared.LearningAppErrorDisplay
 import com.eidu.integration.test.app.ui.shared.EiduScaffold
 import com.eidu.integration.test.app.ui.shared.LoadingIndicator
 import com.eidu.integration.test.app.ui.shared.SAMPLE_APP_1
 import com.eidu.integration.test.app.ui.viewmodel.Result
 
 @Composable
-fun ContentAppResultScreen(
-    contentApp: ContentApp,
-    contentAppResult: Result<RunContentUnitResult>,
+fun LearningAppResultScreen(
+    learningApp: LearningApp,
+    learningAppResult: Result<RunContentUnitResult>,
     copyToClipboard: (String, String) -> Unit,
     goToEditScreen: () -> Unit,
     goBack: () -> Unit
 ) {
     EiduScaffold(
-        title = { Text("Content App Result") },
+        title = { Text("Learning App Result") },
         goBack = goBack
     ) {
-        when (contentAppResult) {
+        when (learningAppResult) {
             is Result.Success ->
-                with(contentAppResult.result) {
+                with(learningAppResult.result) {
                     ResultFields(
                         fields = mapOf(
-                            "Content ID" to contentId,
+                            "Learning Unit ID" to contentId,
                             "Result" to resultType.toString(),
                             "Score" to (if (resultType == RunContentUnitResult.ResultType.Success) "$score" else null),
                             "Foreground duration" to "$foregroundDurationInMs",
@@ -48,9 +48,9 @@ fun ContentAppResultScreen(
             is Result.Loading ->
                 LoadingIndicator()
             is Result.Error ->
-                ContentAppErrorDisplay(
-                    error = contentAppResult,
-                    contentApp = contentApp,
+                LearningAppErrorDisplay(
+                    error = learningAppResult,
+                    learningApp = learningApp,
                     navigateToEditScreen = goToEditScreen
                 )
             is Result.NotFound ->
@@ -84,8 +84,8 @@ private fun ResultFields(fields: Map<String, String?>, copyToClipboard: (String,
 
 @Composable
 @Preview
-private fun ContentAppResultScreenPreview() {
-    ContentAppResultScreen(
+private fun LearningAppResultScreenPreview() {
+    LearningAppResultScreen(
         SAMPLE_APP_1,
         Result.Success(
             RunContentUnitResult.ofSuccess(
