@@ -92,9 +92,6 @@ class MainActivity : ComponentActivity() {
                                                 navController
                                             )
                                         },
-                                        {
-                                            navController.navigate("learning-apps/${learningApp.name}/edit")
-                                        },
                                         goBack
                                     )
                                 }
