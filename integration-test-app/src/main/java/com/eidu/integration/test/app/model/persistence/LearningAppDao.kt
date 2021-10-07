@@ -10,10 +10,10 @@ import com.eidu.integration.test.app.model.LearningApp
 
 @Dao
 interface LearningAppDao {
-    @Query("SELECT * FROM content_apps")
+    @Query("SELECT * FROM learning_apps")
     fun getAll(): LiveData<List<LearningApp>>
 
-    @Query("SELECT * FROM content_apps WHERE name = :name")
+    @Query("SELECT * FROM learning_apps WHERE name = :name")
     suspend fun findByName(name: String): LearningApp?
 
     @Insert(onConflict = REPLACE)

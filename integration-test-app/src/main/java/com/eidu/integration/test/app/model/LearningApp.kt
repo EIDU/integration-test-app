@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "content_apps")
+@Entity(tableName = "learning_apps")
 data class LearningApp(
     @PrimaryKey @ColumnInfo(name = "name") val name: String,
     @ColumnInfo(name = "package") val packageName: String,

@@ -23,7 +23,8 @@ class DatabaseModule {
             AppDatabase::class.java,
             "EIDU Learning Apps"
         ).addMigrations(
-            MIGRATION_1_2
+            MIGRATION_1_2,
+            MIGRATION_2_3
         ).build()
     }
 
@@ -37,6 +38,15 @@ class DatabaseModule {
                 database.execSQL("INSERT INTO content_apps_migration SELECT name, package, launch_class FROM content_apps")
                 database.execSQL("DROP TABLE content_apps")
                 database.execSQL("ALTER TABLE content_apps_migration RENAME TO content_apps")
+            }
+        }
+
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("CREATE TABLE learning_apps_migration (name TEXT NOT NULL PRIMARY KEY, package TEXT NOT NULL, launch_class TEXT NOT NULL)")
+                database.execSQL("INSERT INTO learning_apps_migration SELECT name, package, launch_class FROM content_apps")
+                database.execSQL("DROP TABLE content_apps")
+                database.execSQL("ALTER TABLE learning_apps_migration RENAME TO learning_apps")
             }
         }
     }
