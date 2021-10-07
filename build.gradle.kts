@@ -36,4 +36,4 @@ tasks.register("installGitHooks", Exec::class) {
     commandLine("git", "config", "--local", "core.hooksPath", "git-hooks")
 }
 
-tasks.getByPath(":content-test-app:preBuild").dependsOn(":installGitHooks")
+tasks.getByPath(":integration-test-app:preBuild").dependsOn(":installGitHooks")
