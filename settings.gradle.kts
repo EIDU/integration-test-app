@@ -1,3 +1,3 @@
 rootProject.name = "EIDU Content Test App"
-include(":content-test-app", ":rules", ":custom-ktlint-rules")
-include(":content-sample-app")
+include(":integration-test-app", ":rules", ":custom-ktlint-rules")
+include(":integration-sample-app")
