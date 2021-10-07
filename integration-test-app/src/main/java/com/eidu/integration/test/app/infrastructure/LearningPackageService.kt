@@ -73,7 +73,7 @@ class LearningPackageService @Inject constructor(
 
     private fun getLearningAppUnitFile(learningApp: LearningApp): File {
         val learningPackageDir = getInternalFilesDir(context, learningApp)
-        return learningPackageDir.resolve("content-units.json")
+        return learningPackageDir.resolve("learning-units.json")
     }
 
     @OptIn(ExperimentalSerializationApi::class)
@@ -94,7 +94,7 @@ class LearningPackageService @Inject constructor(
         }.let { Result.Success(it) }
     } catch (e: Throwable) {
         Log.e("LearningPackageService", "Unable to read units.", e)
-        Result.Error("Unable to read units from content-units.json file. Error was: ${e.localizedMessage}")
+        Result.Error("Unable to read units from learning-units.json file. Error was: ${e.localizedMessage}")
     }
 
     private fun extractPackageFile(uri: Uri): File {
