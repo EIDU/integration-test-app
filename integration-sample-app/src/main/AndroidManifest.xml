@@ -3,18 +3,18 @@
     package="com.eidu.integration.sample.app">
 
     <application
-        android:name=".ContentSampleApplication"
+        android:name=".IntegrationSampleApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.EIDUContentTestApp">
+        android:theme="@style/Theme.EIDULearningSampleApp">
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"
             android:label="@string/title_activity_main"
-            android:theme="@style/Theme.EIDUContentTestApp.NoActionBar">
+            android:theme="@style/Theme.EIDULearningSampleApp.NoActionBar">
             <intent-filter>
                 <action android:name="com.eidu.content.launch.LAUNCH_CONTENT" />
                 <category android:name="android.intent.category.DEFAULT"/>

@@ -36,14 +36,14 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.eidu.content.integration.RunContentUnitRequest
 import com.eidu.content.integration.RunContentUnitResult
-import com.eidu.integration.sample.app.EIDUContentTestAppTheme
+import com.eidu.integration.sample.app.EIDUIntegrationSampleAppTheme
 import com.eidu.integration.sample.app.shared.EiduScaffold
 import java.util.Timer
 import java.util.TimerTask
 
 class MainActivity : ComponentActivity() {
 
-    private val contentUnitRunViewModel: ContentUnitRunViewModel by viewModels()
+    private val learningUnitRunViewModel: LearningUnitRunViewModel by viewModels()
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,15 +67,15 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            EIDUContentTestAppTheme {
+            EIDUIntegrationSampleAppTheme {
                 var requestDataState by remember {
                     mutableStateOf(
-                        contentUnitRunViewModel.resultFromRequest(
+                        learningUnitRunViewModel.resultFromRequest(
                             request
                         )
                     )
                 }
-                EiduScaffold(title = { Text("Run of ${requestDataState.contentId}") }) {
+                EiduScaffold(title = { Text("Run of ${requestDataState.learningUnitId}") }) {
                     Column {
                         Card(
                             border = BorderStroke(1.dp, Color.LightGray),
@@ -89,12 +89,12 @@ class MainActivity : ComponentActivity() {
                                 Divider()
                                 if (expanded) {
                                     ListItem(
-                                        text = { Text(requestDataState.contentId) },
-                                        secondaryText = { Text("Content Unit ID") }
+                                        text = { Text(requestDataState.learningUnitId) },
+                                        secondaryText = { Text("Learning Unit ID") }
                                     )
                                     ListItem(
-                                        text = { Text(requestDataState.contentRunId) },
-                                        secondaryText = { Text("Content Unit Run ID") }
+                                        text = { Text(requestDataState.learningUnitRunId) },
+                                        secondaryText = { Text("Learning Unit Run ID") }
                                     )
                                     ListItem(
                                         text = { Text(requestDataState.learnerId) },
