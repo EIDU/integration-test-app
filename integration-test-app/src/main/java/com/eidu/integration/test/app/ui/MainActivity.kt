@@ -22,6 +22,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.eidu.integration.test.app.model.LearningApp
+import com.eidu.integration.test.app.ui.screens.EditLearningAppScreen
 import com.eidu.integration.test.app.ui.screens.LearningAppResultScreen
 import com.eidu.integration.test.app.ui.screens.LearningAppsScreen
 import com.eidu.integration.test.app.ui.screens.LearningUnitsScreen
@@ -61,7 +62,9 @@ class MainActivity : ComponentActivity() {
                                 learningApps.value,
                                 { learningApp -> navController.navigate("learning-apps/${learningApp.name}/units") },
                                 { learningApp -> learningAppViewModel.deleteLearningApp(learningApp) },
-                                { packageFilePicker.launch(arrayOf("application/zip")) }
+                                { learningApp -> navController.navigate("learning-apps/${learningApp.name}/edit") },
+                                { packageFilePicker.launch(arrayOf("application/zip")) },
+                                { navController.navigate("learning-apps/create") }
                             )
                         }
                         composable("learning-apps/{app}/units") { backStackEntry ->
@@ -119,6 +122,34 @@ class MainActivity : ComponentActivity() {
                                         },
                                         {
                                             navController.navigate("learning-apps/${app.result.name}/edit")
+                                        },
+                                        goBack
+                                    )
+                                }
+                            }
+                        }
+                        composable("learning-apps/create") {
+                            EditLearningAppScreen(
+                                learningApp = null,
+                                onSubmit = { updatedApp: LearningApp ->
+                                    learningAppViewModel.upsertLearningApp(
+                                        updatedApp
+                                    )
+                                },
+                                goBack
+                            )
+                        }
+                        composable("learning-apps/{app}/edit") { backStackEntry ->
+                            when (val app: Result<LearningApp> = getAppNameState(backStackEntry)) {
+                                is Result.Loading -> CircularProgressIndicator()
+                                is Result.NotFound -> navController.navigate("learning-apps")
+                                is Result.Success -> {
+                                    EditLearningAppScreen(
+                                        learningApp = app.result,
+                                        onSubmit = { updatedApp: LearningApp ->
+                                            learningAppViewModel.upsertLearningApp(
+                                                updatedApp
+                                            )
                                         },
                                         goBack
                                     )
