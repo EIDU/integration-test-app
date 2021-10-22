@@ -61,6 +61,7 @@ jobs:
           repository: EIDU/ci-notify-slack
           token: ${{ secrets.GH_READPACKAGES_TOKEN }}
           path: .github/actions/ci-notify-slack
+        if: always()
 
       - name: "Post Slack message to #build"
         uses: ./.github/actions/ci-notify-slack
