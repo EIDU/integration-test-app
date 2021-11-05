@@ -42,7 +42,7 @@ jobs:
       - name: Build APK
         run: |
           base64 -d <<< "${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}" > integration-test-app/$ANDROID_KEYSTORE_PATH
-          ./gradlew assembleRelease sourcesJar --stacktrace
+          ./gradlew assembleRelease --stacktrace
 
       - name: Upload App APK to S3
         run: |
