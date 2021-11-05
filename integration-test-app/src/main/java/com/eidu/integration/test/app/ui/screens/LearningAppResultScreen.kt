@@ -35,7 +35,6 @@ fun LearningAppResultScreen(
                 with(learningAppResult.result) {
                     ResultFields(
                         fields = mapOf(
-                            "Learning Unit ID" to learningUnitId,
                             "Result" to resultType.toString(),
                             "Score" to (if (resultType != RunLearningUnitResult.ResultType.Error) "$score" else null),
                             "Foreground duration" to "$foregroundDurationInMs",
@@ -89,7 +88,6 @@ private fun LearningAppResultScreenPreview() {
         SAMPLE_APP_1,
         Result.Success(
             RunLearningUnitResult.ofSuccess(
-                "03.EIDU.FishTank",
                 1.0f,
                 48_735,
                 "{ \"numberOfClicks\": 14 }"
