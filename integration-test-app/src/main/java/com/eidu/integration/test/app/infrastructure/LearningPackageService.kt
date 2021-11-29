@@ -30,8 +30,8 @@ class LearningPackageService @Inject constructor(
         learningApp: LearningApp,
         clipboardService: ClipboardManager
     ): Result<List<LearningUnit>> {
-        val unitFile = getLearningAppUnitFile(learningApp)
-        val learningAppVersion = getLearningAppVersion(context, learningApp)
+        val unitFile = getLearningAppUnitFile(learningApp.packageName)
+        val learningAppVersion = getLearningAppVersion(context, learningApp.packageName)
         return if (!unitFile.exists()) {
             clipboardService.setPrimaryClip(ClipData.newPlainText("Unit File", unitFile.path))
             Result.Error(
@@ -47,32 +47,32 @@ class LearningPackageService @Inject constructor(
     fun loadLearningAppFromLearningPackage(uri: Uri): LearningApp {
         val extractionDir = extractPackageFile(uri)
         val learningApp = readLearningAppMetadata(extractionDir)
-        copyPackageContentToInternalFiles(learningApp, extractionDir)
+        copyPackageContentToInternalFiles(learningApp.packageName, extractionDir)
         return learningApp
     }
 
     private fun getInternalFilesDir(
         context: Context,
-        learningApp: LearningApp
-    ) = context.filesDir.resolve(learningApp.packageName)
+        learningAppPackage: String
+    ) = context.filesDir.resolve(learningAppPackage)
 
-    private fun getLearningAppVersion(context: Context, learningApp: LearningApp): String? =
-        getLearningAppInfo(context, learningApp)?.versionName
+    private fun getLearningAppVersion(context: Context, learningAppPackage: String): String? =
+        getLearningAppInfo(context, learningAppPackage)?.versionName
 
-    private fun getLearningAppInfo(context: Context, learningApp: LearningApp): PackageInfo? =
+    private fun getLearningAppInfo(context: Context, learningAppPackage: String): PackageInfo? =
         try {
-            context.packageManager.getPackageInfo(learningApp.packageName, 0)
+            context.packageManager.getPackageInfo(learningAppPackage, 0)
         } catch (e: PackageManager.NameNotFoundException) {
             Log.e(
                 "LearningAppViewModel",
-                "getLearningAppInfo: unable to query learning app info for package ${learningApp.packageName}",
+                "getLearningAppInfo: unable to query learning app info for package $learningAppPackage",
                 e
             )
             null
         }
 
-    private fun getLearningAppUnitFile(learningApp: LearningApp): File {
-        val learningPackageDir = getInternalFilesDir(context, learningApp)
+    private fun getLearningAppUnitFile(learningAppPackage: String): File {
+        val learningPackageDir = getInternalFilesDir(context, learningAppPackage)
         return learningPackageDir.resolve("learning-units.json")
     }
 
@@ -142,10 +142,10 @@ class LearningPackageService @Inject constructor(
     }
 
     private fun copyPackageContentToInternalFiles(
-        learningApp: LearningApp,
+        learningAppPackage: String,
         extractionDir: File
     ) {
-        val internalLearningAppDir = getInternalFilesDir(context, learningApp)
+        val internalLearningAppDir = getInternalFilesDir(context, learningAppPackage)
         internalLearningAppDir.mkdirs()
         extractionDir.copyRecursively(internalLearningAppDir, overwrite = true)
         extractionDir.deleteRecursively()
