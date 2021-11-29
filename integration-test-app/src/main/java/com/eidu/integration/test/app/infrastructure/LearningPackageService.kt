@@ -146,6 +146,7 @@ class LearningPackageService @Inject constructor(
         extractionDir: File
     ) {
         val internalLearningAppDir = getInternalFilesDir(context, learningAppPackage)
+        internalLearningAppDir.deleteRecursively()
         internalLearningAppDir.mkdirs()
         extractionDir.copyRecursively(internalLearningAppDir, overwrite = true)
         extractionDir.deleteRecursively()
