@@ -104,12 +104,10 @@ class LearningPackageService @Inject constructor(
             val stream = ZipInputStream(it)
             var entry = stream.nextEntry
             while (entry != null) {
-                if (entry.isDirectory) {
-                    Log.i("LearningPackageService", "Extracting directory ${entry.name}")
-                    extractionDir.resolve(entry.name).mkdirs()
-                } else {
+                if (!entry.isDirectory) {
                     Log.i("LearningPackageService", "Extracting file ${entry.name}")
                     val extractTo = extractionDir.resolve(entry.name)
+                    extractTo.parentFile?.mkdirs()
                     stream.copyTo(extractTo.outputStream())
                 }
                 stream.closeEntry()
