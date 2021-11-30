@@ -134,7 +134,7 @@ class MainActivity : ComponentActivity() {
                             EditLearningAppScreen(
                                 learningApp = null,
                                 onSubmit = { updatedApp: LearningApp ->
-                                    learningAppViewModel.upsertLearningApp(
+                                    learningAppViewModel.putLearningApp(
                                         updatedApp
                                     )
                                 },
@@ -149,7 +149,7 @@ class MainActivity : ComponentActivity() {
                                     EditLearningAppScreen(
                                         learningApp = app.result,
                                         onSubmit = { updatedApp: LearningApp ->
-                                            learningAppViewModel.upsertLearningApp(
+                                            learningAppViewModel.putLearningApp(
                                                 updatedApp
                                             )
                                         },
@@ -179,7 +179,7 @@ class MainActivity : ComponentActivity() {
         val appName = backStackEntry.arguments?.getString("app")
             ?: error("No app name specified")
         val app: Result<LearningApp> by remember {
-            learningAppViewModel.getLearningAppByName(appName)
+            learningAppViewModel.getLearningAppByPackageName(appName)
         }.observeAsState(initial = Result.Loading)
         return app
     }

@@ -26,29 +26,28 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LearningAppViewModel @Inject constructor(
-    private val learningAppRepository: LearningAppRepository,
     private val learningPackageService: LearningPackageService
 ) : ViewModel() {
 
     private val _learningUnits = MutableLiveData<Result<List<LearningUnit>>>(Result.Loading)
     private val _learningAppResult = MutableLiveData<Result<RunLearningUnitResult>>()
 
-    fun getLearningApps(): LiveData<List<LearningApp>> = learningAppRepository.listLive()
+    fun getLearningApps(): LiveData<List<LearningApp>> = learningPackageService.listLive()
 
-    fun upsertLearningApp(learningApp: LearningApp) =
+    fun putLearningApp(learningApp: LearningApp) =
         viewModelScope.launch(Dispatchers.IO) {
-            learningAppRepository.put(learningApp)
+            learningPackageService.put(learningApp)
         }
 
     fun deleteLearningApp(learningApp: LearningApp) =
         viewModelScope.launch(Dispatchers.IO) {
-            learningAppRepository.delete(learningApp)
+            learningPackageService.delete(learningApp)
         }
 
-    fun getLearningAppByName(name: String): LiveData<Result<LearningApp>> {
+    fun getLearningAppByPackageName(name: String): LiveData<Result<LearningApp>> {
         val data = MutableLiveData<Result<LearningApp>>(Result.Loading)
         viewModelScope.launch(Dispatchers.IO) {
-            val app = learningAppRepository.findByPackageName(name)
+            val app = learningPackageService.findByPackageName(name)
             if (app != null) {
                 data.postValue(Result.Success(app))
             } else {
@@ -91,8 +90,7 @@ class LearningAppViewModel @Inject constructor(
 
     fun handleLearningPackageFile(uri: Uri) {
         viewModelScope.launch(Dispatchers.IO) {
-            val learningAppFromPackage = learningPackageService.loadLearningAppFromLearningPackage(uri)
-            upsertLearningApp(learningAppFromPackage)
+            learningPackageService.putLearningPackage(uri)
         }
     }
 

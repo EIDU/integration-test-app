@@ -5,6 +5,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
+import androidx.lifecycle.LiveData
 import com.eidu.integration.test.app.model.LearningApp
 import com.eidu.integration.test.app.model.LearningUnit
 import com.eidu.integration.test.app.ui.viewmodel.Result
@@ -21,7 +22,8 @@ import javax.inject.Singleton
 
 @Singleton
 class LearningPackageService @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val repository: LearningAppRepository
 ) {
 
     fun getLearningUnits(learningAppPackage: String): Result<List<LearningUnit>> {
@@ -47,11 +49,11 @@ class LearningPackageService @Inject constructor(
             .resolve("assets")
             .takeIf { it.exists() }
 
-    fun loadLearningAppFromLearningPackage(uri: Uri): LearningApp {
+    fun putLearningPackage(uri: Uri) {
         val extractionDir = extractPackageFile(uri)
         val learningApp = readLearningAppMetadata(extractionDir)
         copyPackageContentToInternalFiles(learningApp.packageName, extractionDir)
-        return learningApp
+        repository.put(learningApp)
     }
 
     private fun getInternalFilesDir(
@@ -154,6 +156,11 @@ class LearningPackageService @Inject constructor(
         extractionDir.copyRecursively(internalLearningAppDir, overwrite = true)
         extractionDir.deleteRecursively()
     }
+
+    fun listLive(): LiveData<List<LearningApp>> = repository.listLive()
+    fun put(learningApp: LearningApp) = repository.put(learningApp)
+    fun delete(learningApp: LearningApp) = repository.delete(learningApp)
+    fun findByPackageName(name: String): LearningApp? = repository.findByPackageName(name)
 }
 
 @Serializable
