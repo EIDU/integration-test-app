@@ -74,10 +74,15 @@ class MainActivity : ComponentActivity() {
                                     val learningApp = app.result
                                     val unitLoadingState by remember {
                                         learningAppViewModel
-                                            .loadUnitsFromLearningPackageUnitsFile(
-                                                learningApp,
-                                                clipboardService
-                                            )
+                                            .loadUnitsFromLearningPackageUnitsFile(learningApp)
+                                            .apply {
+                                                observe(this@MainActivity) {
+                                                    if (it is Result.Error)
+                                                        clipboardService.setPrimaryClip(
+                                                            ClipData.newPlainText("Error", it.reason)
+                                                        )
+                                                }
+                                            }
                                     }.observeAsState(initial = Result.Loading)
 
                                     LearningUnitsScreen(

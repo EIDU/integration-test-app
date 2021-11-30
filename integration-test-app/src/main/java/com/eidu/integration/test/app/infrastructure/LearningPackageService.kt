@@ -1,7 +1,5 @@
 package com.eidu.integration.test.app.infrastructure
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
@@ -26,22 +24,17 @@ class LearningPackageService @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
 
-    fun getLearningUnits(
-        learningAppPackage: String,
-        clipboardService: ClipboardManager
-    ): Result<List<LearningUnit>> {
+    fun getLearningUnits(learningAppPackage: String): Result<List<LearningUnit>> {
         val unitFile = getLearningAppUnitFile(learningAppPackage)
         val learningAppVersion = getLearningAppVersion(context, learningAppPackage)
-        return if (!unitFile.exists()) {
-            clipboardService.setPrimaryClip(ClipData.newPlainText("Unit File", unitFile.path))
+        return if (!unitFile.exists())
             Result.Error(
                 "Units file ${unitFile.path} does not exist. Have you uploaded a complete and correct learning package?"
             )
-        } else if (learningAppVersion == null) {
+        else if (learningAppVersion == null)
             Result.Error("Unable to determine learning app version")
-        } else {
+        else
             readLearningUnitsFromFile(unitFile, learningAppPackage, learningAppVersion)
-        }
     }
 
     fun getAsset(learningAppPackage: String, filePath: String): File? =

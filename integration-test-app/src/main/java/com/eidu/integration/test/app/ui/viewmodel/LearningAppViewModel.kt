@@ -59,18 +59,10 @@ class LearningAppViewModel @Inject constructor(
         return data
     }
 
-    fun loadUnitsFromLearningPackageUnitsFile(
-        learningApp: LearningApp,
-        clipboardService: ClipboardManager
-    ): LiveData<Result<List<LearningUnit>>> {
+    fun loadUnitsFromLearningPackageUnitsFile(learningApp: LearningApp): LiveData<Result<List<LearningUnit>>> {
         _learningUnits.postValue(Result.Loading)
         viewModelScope.launch(Dispatchers.IO) {
-            _learningUnits.postValue(
-                learningPackageService.getLearningUnits(
-                    learningApp.packageName,
-                    clipboardService
-                )
-            )
+            _learningUnits.postValue(learningPackageService.getLearningUnits(learningApp.packageName))
         }
         return _learningUnits
     }
