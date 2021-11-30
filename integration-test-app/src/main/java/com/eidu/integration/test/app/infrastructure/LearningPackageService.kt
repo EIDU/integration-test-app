@@ -27,11 +27,11 @@ class LearningPackageService @Inject constructor(
 ) {
 
     fun getLearningUnits(
-        learningApp: LearningApp,
+        learningAppPackage: String,
         clipboardService: ClipboardManager
     ): Result<List<LearningUnit>> {
-        val unitFile = getLearningAppUnitFile(learningApp.packageName)
-        val learningAppVersion = getLearningAppVersion(context, learningApp.packageName)
+        val unitFile = getLearningAppUnitFile(learningAppPackage)
+        val learningAppVersion = getLearningAppVersion(context, learningAppPackage)
         return if (!unitFile.exists()) {
             clipboardService.setPrimaryClip(ClipData.newPlainText("Unit File", unitFile.path))
             Result.Error(
@@ -40,7 +40,7 @@ class LearningPackageService @Inject constructor(
         } else if (learningAppVersion == null) {
             Result.Error("Unable to determine learning app version")
         } else {
-            readLearningUnitsFromFile(unitFile, learningApp, learningAppVersion)
+            readLearningUnitsFromFile(unitFile, learningAppPackage, learningAppVersion)
         }
     }
 
@@ -89,14 +89,14 @@ class LearningPackageService @Inject constructor(
     @OptIn(ExperimentalSerializationApi::class)
     private fun readLearningUnitsFromFile(
         unitFile: File,
-        learningApp: LearningApp,
+        learningAppPackage: String,
         learningAppVersion: String
     ) = try {
         unitFile.readText().let {
             Json.decodeFromString<LearningUnitList>(it)
         }.learningUnits.map {
             LearningUnit(
-                learningApp,
+                learningAppPackage,
                 learningAppVersion,
                 it.unitId,
                 it.icon

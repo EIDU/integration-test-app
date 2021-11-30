@@ -51,7 +51,7 @@ fun LearningUnitsScreen(
         when (learningUnits) {
             is Result.Success -> LazyColumn {
                 items(learningUnits.result, { it.toString() }) {
-                    LearningUnitRow(learningUnit = it) { runUnit(it) }
+                    LearningUnitRow(learningApp, learningUnit = it) { runUnit(it) }
                     Divider()
                 }
             }
@@ -91,13 +91,13 @@ fun LearningUnitsScreen(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun LearningUnitRow(learningUnit: LearningUnit, runUnit: () -> Unit) {
+fun LearningUnitRow(learningApp: LearningApp, learningUnit: LearningUnit, runUnit: () -> Unit) {
     ListItem(
         Modifier.clickable { runUnit() },
         text = { Text(learningUnit.unitId) },
         secondaryText = {
             Row {
-                Text(learningUnit.learningApp.name, fontWeight = FontWeight.ExtraBold)
+                Text(learningApp.name, fontWeight = FontWeight.ExtraBold)
                 Spacer(modifier = Modifier.width(5.dp))
                 Text(learningUnit.learningAppVersion)
             }
@@ -126,7 +126,7 @@ private fun RunManualContentUnit(
     )
     Button(
         onClick = {
-            runUnit(LearningUnit(learningApp, "1.0", unitId, ""))
+            runUnit(LearningUnit(learningApp.packageName, "1.0", unitId, ""))
         },
         modifier = Modifier
             .fillMaxWidth()
@@ -161,5 +161,5 @@ private fun LearningUnitListErrorPreview() {
 }
 
 private fun sampleLearningUnits(): List<LearningUnit> = (1..20).map {
-    LearningUnit(SAMPLE_APP_1, "1.7.23", "Learning-Unit-$it", "sample.png")
+    LearningUnit(SAMPLE_APP_1.packageName, "1.7.23", "Learning-Unit-$it", "sample.png")
 }

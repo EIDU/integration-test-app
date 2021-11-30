@@ -67,7 +67,7 @@ class LearningAppViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             _learningUnits.postValue(
                 learningPackageService.getLearningUnits(
-                    learningApp,
+                    learningApp.packageName,
                     clipboardService
                 )
             )
