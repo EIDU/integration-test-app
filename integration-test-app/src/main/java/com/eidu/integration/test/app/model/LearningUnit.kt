@@ -13,4 +13,9 @@ data class LearningUnit(
     val icon: String,
     val additionalAssets: List<String>,
     @Id var id: Long = 0
-)
+) {
+    fun allowsAsset(filePath: String): Boolean =
+        additionalAssets.any {
+            filePath == it || (it.endsWith('/') && filePath.startsWith(it))
+        }
+}

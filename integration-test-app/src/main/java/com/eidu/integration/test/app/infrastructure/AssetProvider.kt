@@ -43,8 +43,9 @@ class AssetProvider : ContentProvider() {
 
         val learningAppPackage = uri.pathSegments.firstOrNull() ?: throw FileNotFoundException("No path in $uri")
         val filePath = uri.pathSegments.drop(1).joinToString("/")
+        val unitId = uri.getQueryParameter("unit") ?: throw FileNotFoundException("No unit ID in $uri")
 
-        return hiltEntryPoint.learningPackageService().getAsset(learningAppPackage, filePath)
+        return hiltEntryPoint.learningPackageService().getAsset(learningAppPackage, filePath, unitId)
             ?: throw FileNotFoundException(uri.toString())
     }
 

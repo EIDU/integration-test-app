@@ -7,7 +7,6 @@ import com.eidu.integration.test.app.model.LearningApp_
 import com.eidu.integration.test.app.model.LearningUnit
 import com.eidu.integration.test.app.model.LearningUnit_
 import com.eidu.integration.test.app.model.MyObjectBox
-import com.eidu.integration.test.app.ui.viewmodel.Result
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.objectbox.android.ObjectBoxLiveData
 import io.objectbox.kotlin.boxFor
@@ -47,4 +46,11 @@ class LearningAppRepository @Inject constructor(
         learningUnits.query { equal(LearningUnit_.learningAppPackage, learningAppPackage, QueryBuilder.StringOrder.CASE_SENSITIVE) }.remove()
         learningUnits.put(units)
     }
+
+    fun findUnit(learningAppPackage: String, unitId: String): LearningUnit? =
+        learningUnits.query {
+            equal(LearningUnit_.learningAppPackage, learningAppPackage, QueryBuilder.StringOrder.CASE_SENSITIVE)
+            and()
+            equal(LearningUnit_.unitId, unitId, QueryBuilder.StringOrder.CASE_SENSITIVE)
+        }.findFirst()
 }

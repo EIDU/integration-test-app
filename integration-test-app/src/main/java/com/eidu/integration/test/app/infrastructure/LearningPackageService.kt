@@ -27,10 +27,11 @@ class LearningPackageService @Inject constructor(
     fun getLearningUnits(learningAppPackage: String): List<LearningUnit> =
         repository.getLearningUnits(learningAppPackage)
 
-    fun getAsset(learningAppPackage: String, filePath: String): File? =
-        getAssetsDir(learningAppPackage)
-            ?.resolve(filePath)
-            ?.takeIf { it.isFile }
+    fun getAsset(learningAppPackage: String, filePath: String, unitId: String): File? =
+        if (repository.findUnit(learningAppPackage, unitId)?.allowsAsset(filePath) == true)
+            getAssetsDir(learningAppPackage)?.resolve(filePath)?.takeIf { it.isFile }
+        else
+            null
 
     private fun getAssetsDir(learningAppPackage: String): File? =
         getInternalFilesDir(context, learningAppPackage)
