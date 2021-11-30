@@ -1,12 +1,14 @@
 package com.eidu.integration.test.app.model
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import io.objectbox.annotation.ConflictStrategy
+import io.objectbox.annotation.Entity
+import io.objectbox.annotation.Id
+import io.objectbox.annotation.Unique
 
-@Entity(tableName = "learning_apps")
+@Entity
 data class LearningApp(
-    @PrimaryKey @ColumnInfo(name = "name") val name: String,
-    @ColumnInfo(name = "package") val packageName: String,
-    @ColumnInfo(name = "launch_class") val launchClass: String
+    val name: String,
+    @Unique(onConflict = ConflictStrategy.REPLACE) val packageName: String,
+    val launchClass: String,
+    @Id var id: Long = 0
 )

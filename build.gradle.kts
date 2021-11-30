@@ -10,6 +10,7 @@ buildscript {
     }
     dependencies {
         classpath("com.android.tools.build:gradle:${Versions.gradle}")
+        classpath("io.objectbox:objectbox-gradle-plugin:${Versions.objectBox}")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.30")
         classpath("com.google.dagger:hilt-android-gradle-plugin:${Versions.hilt}")
 

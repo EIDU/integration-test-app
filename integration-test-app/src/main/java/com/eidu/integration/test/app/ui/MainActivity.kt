@@ -60,9 +60,9 @@ class MainActivity : ComponentActivity() {
 
                             LearningAppsScreen(
                                 learningApps.value,
-                                { learningApp -> navController.navigate("learning-apps/${learningApp.name}/units") },
+                                { learningApp -> navController.navigate("learning-apps/${learningApp.packageName}/units") },
                                 { learningApp -> learningAppViewModel.deleteLearningApp(learningApp) },
-                                { learningApp -> navController.navigate("learning-apps/${learningApp.name}/edit") },
+                                { learningApp -> navController.navigate("learning-apps/${learningApp.packageName}/edit") },
                                 { packageFilePicker.launch(arrayOf("application/zip")) },
                                 { navController.navigate("learning-apps/create") }
                             )
@@ -123,7 +123,7 @@ class MainActivity : ComponentActivity() {
                                             copyToClipboardToast.show()
                                         },
                                         {
-                                            navController.navigate("learning-apps/${app.result.name}/edit")
+                                            navController.navigate("learning-apps/${app.result.packageName}/edit")
                                         },
                                         goBack
                                     )

@@ -5,7 +5,8 @@ import utils.toVersionCode
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("org.jetbrains.kotlin.kapt")
+    id("kotlin-kapt")
+    id("io.objectbox")
     id("dagger.hilt.android.plugin")
     id("org.jlleitschuh.gradle.ktlint") version Versions.ktlintGradle
     kotlin("plugin.serialization") version "1.5.30"
@@ -28,13 +29,6 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-
-        javaCompileOptions.annotationProcessorOptions.arguments(
-            mapOf(
-                "room.schemaLocation" to "$projectDir/schemas",
-                "room.incremental" to "true"
-            )
-        )
     }
 
     signingConfigs {
@@ -99,12 +93,6 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:${Versions.navigation}")
     implementation("androidx.compose.material:material-icons-extended:${Versions.compose}")
     implementation("androidx.activity:activity-compose:1.3.1")
-
-    // Room DB
-    implementation("androidx.room:room-runtime:${Versions.room}")
-    annotationProcessor("androidx.room:room-compiler:${Versions.room}")
-    kapt("androidx.room:room-compiler:${Versions.room}")
-    implementation("androidx.room:room-ktx:${Versions.room}")
 
     // Hilt/Dagger DI
     implementation("com.google.dagger:hilt-android:${Versions.hilt}")

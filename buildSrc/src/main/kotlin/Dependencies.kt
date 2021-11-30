@@ -10,7 +10,7 @@ object Versions {
     const val gradle = "7.0.2"
     const val kotlin = "1.5.30"
     const val compose = "1.1.0-alpha03"
-    const val room = "2.3.0"
+    const val objectBox = "3.0.1"
     const val navigation = "2.4.0-alpha08"
     const val ktlintGradle = "10.1.0"
     const val hilt = "2.38.1"

@@ -1,7 +1,6 @@
 package com.eidu.integration.test.app.ui.viewmodel
 
 import android.app.Activity
-import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -16,10 +15,10 @@ import androidx.navigation.NavController
 import com.eidu.integration.RunLearningUnitRequest
 import com.eidu.integration.RunLearningUnitResult
 import com.eidu.integration.test.app.infrastructure.AssetProvider
+import com.eidu.integration.test.app.infrastructure.LearningAppRepository
 import com.eidu.integration.test.app.infrastructure.LearningPackageService
 import com.eidu.integration.test.app.model.LearningApp
 import com.eidu.integration.test.app.model.LearningUnit
-import com.eidu.integration.test.app.model.persistence.LearningAppDao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -27,29 +26,29 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LearningAppViewModel @Inject constructor(
-    private val learningAppDao: LearningAppDao,
+    private val learningAppRepository: LearningAppRepository,
     private val learningPackageService: LearningPackageService
 ) : ViewModel() {
 
     private val _learningUnits = MutableLiveData<Result<List<LearningUnit>>>(Result.Loading)
     private val _learningAppResult = MutableLiveData<Result<RunLearningUnitResult>>()
 
-    fun getLearningApps(): LiveData<List<LearningApp>> = learningAppDao.getAll()
+    fun getLearningApps(): LiveData<List<LearningApp>> = learningAppRepository.listLive()
 
     fun upsertLearningApp(learningApp: LearningApp) =
         viewModelScope.launch(Dispatchers.IO) {
-            learningAppDao.upsert(learningApp)
+            learningAppRepository.put(learningApp)
         }
 
     fun deleteLearningApp(learningApp: LearningApp) =
         viewModelScope.launch(Dispatchers.IO) {
-            learningAppDao.delete(learningApp)
+            learningAppRepository.delete(learningApp)
         }
 
     fun getLearningAppByName(name: String): LiveData<Result<LearningApp>> {
         val data = MutableLiveData<Result<LearningApp>>(Result.Loading)
         viewModelScope.launch(Dispatchers.IO) {
-            val app = learningAppDao.findByName(name)
+            val app = learningAppRepository.findByPackageName(name)
             if (app != null) {
                 data.postValue(Result.Success(app))
             } else {
@@ -111,7 +110,7 @@ class LearningAppViewModel @Inject constructor(
             learningApp,
             learningUnit
         )
-        navController.navigate("learning-apps/${learningApp.name}/result")
+        navController.navigate("learning-apps/${learningApp.packageName}/result")
         if (context.packageManager.resolveActivity(launchIntent, 0) != null) {
             learningAppLauncher.launch(launchIntent)
         } else {
