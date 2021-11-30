@@ -15,6 +15,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.eidu.integration.RunLearningUnitRequest
 import com.eidu.integration.RunLearningUnitResult
+import com.eidu.integration.test.app.infrastructure.AssetProvider
 import com.eidu.integration.test.app.infrastructure.LearningPackageService
 import com.eidu.integration.test.app.model.LearningApp
 import com.eidu.integration.test.app.model.LearningUnit
@@ -144,7 +145,8 @@ class LearningAppViewModel @Inject constructor(
             "Test School",
             "test",
             null,
-            null
+            null,
+            AssetProvider.assetBaseUri(learningApp, learningUnit)
         ).toIntent(learningApp.packageName, learningApp.launchClass)
 
     private fun clearLearningAppResult() {

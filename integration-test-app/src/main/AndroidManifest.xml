@@ -13,6 +13,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.EIDUIntegrationTestApp">
+
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"
@@ -24,5 +25,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:authorities="com.eidu.integration.test.app.assets"
+            android:name=".infrastructure.AssetProvider"
+            android:exported="true"
+            tools:ignore="ExportedContentProvider" />
+
     </application>
 </manifest>

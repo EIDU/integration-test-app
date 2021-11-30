@@ -44,6 +44,16 @@ class LearningPackageService @Inject constructor(
         }
     }
 
+    fun getAsset(learningAppPackage: String, filePath: String): File? =
+        getAssetsDir(learningAppPackage)
+            ?.resolve(filePath)
+            ?.takeIf { it.isFile }
+
+    private fun getAssetsDir(learningAppPackage: String): File? =
+        getInternalFilesDir(context, learningAppPackage)
+            .resolve("assets")
+            .takeIf { it.exists() }
+
     fun loadLearningAppFromLearningPackage(uri: Uri): LearningApp {
         val extractionDir = extractPackageFile(uri)
         val learningApp = readLearningAppMetadata(extractionDir)
