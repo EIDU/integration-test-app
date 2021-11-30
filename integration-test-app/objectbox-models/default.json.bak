@@ -16,7 +16,9 @@
         {
           "id": "2:8870418731674025550",
           "name": "packageName",
-          "type": 9
+          "indexId": "1:1260631597519698058",
+          "type": 9,
+          "flags": 34848
         },
         {
           "id": "3:1854834005185853241",
@@ -34,7 +36,7 @@
     }
   ],
   "lastEntityId": "1:4574749818706646570",
-  "lastIndexId": "0:0",
+  "lastIndexId": "1:1260631597519698058",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

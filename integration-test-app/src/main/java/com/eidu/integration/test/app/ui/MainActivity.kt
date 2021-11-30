@@ -74,7 +74,7 @@ class MainActivity : ComponentActivity() {
                                     val learningApp = app.result
                                     val unitLoadingState by remember {
                                         learningAppViewModel
-                                            .loadUnitsFromLearningPackageUnitsFile(learningApp)
+                                            .getLearningUnitsByPackageName(learningApp.packageName)
                                             .apply {
                                                 observe(this@MainActivity) {
                                                     if (it is Result.Error)
@@ -169,9 +169,9 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleFilePicked(uri: Uri?) {
-        if (uri != null) {
+        if (uri != null)
             learningAppViewModel.handleLearningPackageFile(uri)
-        }
+                .observe(this) { Toast.makeText(this, it, Toast.LENGTH_LONG).show() }
     }
 
     @Composable

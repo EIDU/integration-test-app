@@ -15,7 +15,6 @@ import androidx.navigation.NavController
 import com.eidu.integration.RunLearningUnitRequest
 import com.eidu.integration.RunLearningUnitResult
 import com.eidu.integration.test.app.infrastructure.AssetProvider
-import com.eidu.integration.test.app.infrastructure.LearningAppRepository
 import com.eidu.integration.test.app.infrastructure.LearningPackageService
 import com.eidu.integration.test.app.model.LearningApp
 import com.eidu.integration.test.app.model.LearningUnit
@@ -29,7 +28,6 @@ class LearningAppViewModel @Inject constructor(
     private val learningPackageService: LearningPackageService
 ) : ViewModel() {
 
-    private val _learningUnits = MutableLiveData<Result<List<LearningUnit>>>(Result.Loading)
     private val _learningAppResult = MutableLiveData<Result<RunLearningUnitResult>>()
 
     fun getLearningApps(): LiveData<List<LearningApp>> = learningPackageService.listLive()
@@ -57,12 +55,16 @@ class LearningAppViewModel @Inject constructor(
         return data
     }
 
-    fun loadUnitsFromLearningPackageUnitsFile(learningApp: LearningApp): LiveData<Result<List<LearningUnit>>> {
-        _learningUnits.postValue(Result.Loading)
+    fun getLearningUnitsByPackageName(name: String): LiveData<Result<List<LearningUnit>>> {
+        val data = MutableLiveData<Result<List<LearningUnit>>>(Result.Loading)
         viewModelScope.launch(Dispatchers.IO) {
-            _learningUnits.postValue(learningPackageService.getLearningUnits(learningApp.packageName))
+            val units = learningPackageService.getLearningUnits(name).takeIf { it.isNotEmpty() }
+            if (units != null)
+                data.postValue(Result.Success(units))
+            else
+                data.postValue(Result.NotFound)
         }
-        return _learningUnits
+        return data
     }
 
     fun processUnitRunResult(activityResult: ActivityResult) {
@@ -88,10 +90,18 @@ class LearningAppViewModel @Inject constructor(
         }
     }
 
-    fun handleLearningPackageFile(uri: Uri) {
+    fun handleLearningPackageFile(uri: Uri): LiveData<String> {
+        val data = MutableLiveData<String>()
         viewModelScope.launch(Dispatchers.IO) {
-            learningPackageService.putLearningPackage(uri)
+            data.postValue(
+                when (val result = learningPackageService.putLearningPackage(uri)) {
+                    is Result.Success -> "Package loaded successfully."
+                    is Result.Error -> "Failed: ${result.reason}"
+                    else -> "Failed."
+                }
+            )
         }
+        return data
     }
 
     fun getLearningAppResult(): LiveData<Result<RunLearningUnitResult>> = _learningAppResult

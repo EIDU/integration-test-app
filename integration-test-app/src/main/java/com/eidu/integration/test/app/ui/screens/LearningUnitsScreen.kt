@@ -3,10 +3,8 @@ package com.eidu.integration.test.app.ui.screens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
@@ -98,8 +96,6 @@ fun LearningUnitRow(learningApp: LearningApp, learningUnit: LearningUnit, runUni
         secondaryText = {
             Row {
                 Text(learningApp.name, fontWeight = FontWeight.ExtraBold)
-                Spacer(modifier = Modifier.width(5.dp))
-                Text(learningUnit.learningAppVersion)
             }
         },
         trailing = {
@@ -126,7 +122,7 @@ private fun RunManualContentUnit(
     )
     Button(
         onClick = {
-            runUnit(LearningUnit(learningApp.packageName, "1.0", unitId, ""))
+            runUnit(LearningUnit(learningApp.packageName, unitId, "", emptyList()))
         },
         modifier = Modifier
             .fillMaxWidth()
@@ -161,5 +157,5 @@ private fun LearningUnitListErrorPreview() {
 }
 
 private fun sampleLearningUnits(): List<LearningUnit> = (1..20).map {
-    LearningUnit(SAMPLE_APP_1.packageName, "1.7.23", "Learning-Unit-$it", "sample.png")
+    LearningUnit(SAMPLE_APP_1.packageName, "Learning-Unit-$it", "sample.png", emptyList())
 }

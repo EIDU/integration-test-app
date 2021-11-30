@@ -1,8 +1,6 @@
 package com.eidu.integration.test.app.infrastructure
 
 import android.content.Context
-import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -26,18 +24,8 @@ class LearningPackageService @Inject constructor(
     private val repository: LearningAppRepository
 ) {
 
-    fun getLearningUnits(learningAppPackage: String): Result<List<LearningUnit>> {
-        val unitFile = getLearningAppUnitFile(learningAppPackage)
-        val learningAppVersion = getLearningAppVersion(context, learningAppPackage)
-        return if (!unitFile.exists())
-            Result.Error(
-                "Units file ${unitFile.path} does not exist. Have you uploaded a complete and correct learning package?"
-            )
-        else if (learningAppVersion == null)
-            Result.Error("Unable to determine learning app version")
-        else
-            readLearningUnitsFromFile(unitFile, learningAppPackage, learningAppVersion)
-    }
+    fun getLearningUnits(learningAppPackage: String): List<LearningUnit> =
+        repository.getLearningUnits(learningAppPackage)
 
     fun getAsset(learningAppPackage: String, filePath: String): File? =
         getAssetsDir(learningAppPackage)
@@ -49,32 +37,35 @@ class LearningPackageService @Inject constructor(
             .resolve("assets")
             .takeIf { it.exists() }
 
-    fun putLearningPackage(uri: Uri) {
+    fun putLearningPackage(uri: Uri): Result<Unit> {
         val extractionDir = extractPackageFile(uri)
         val learningApp = readLearningAppMetadata(extractionDir)
         copyPackageContentToInternalFiles(learningApp.packageName, extractionDir)
-        repository.put(learningApp)
+
+        val result = readLearningUnitsFromFile(
+            getLearningAppUnitFile(learningApp.packageName),
+            learningApp.packageName
+        )
+
+        return when (result) {
+            is Result.Success<List<LearningUnit>> -> {
+                repository.replaceLearningUnits(
+                    learningApp.packageName,
+                    result.result
+                )
+
+                repository.put(learningApp)
+                Result.Success(Unit)
+            }
+            is Result.Error -> result
+            else -> error("Unknown error.")
+        }
     }
 
     private fun getInternalFilesDir(
         context: Context,
         learningAppPackage: String
     ) = context.filesDir.resolve(learningAppPackage)
-
-    private fun getLearningAppVersion(context: Context, learningAppPackage: String): String? =
-        getLearningAppInfo(context, learningAppPackage)?.versionName
-
-    private fun getLearningAppInfo(context: Context, learningAppPackage: String): PackageInfo? =
-        try {
-            context.packageManager.getPackageInfo(learningAppPackage, 0)
-        } catch (e: PackageManager.NameNotFoundException) {
-            Log.e(
-                "LearningAppViewModel",
-                "getLearningAppInfo: unable to query learning app info for package $learningAppPackage",
-                e
-            )
-            null
-        }
 
     private fun getLearningAppUnitFile(learningAppPackage: String): File {
         val learningPackageDir = getInternalFilesDir(context, learningAppPackage)
@@ -84,17 +75,16 @@ class LearningPackageService @Inject constructor(
     @OptIn(ExperimentalSerializationApi::class)
     private fun readLearningUnitsFromFile(
         unitFile: File,
-        learningAppPackage: String,
-        learningAppVersion: String
+        learningAppPackage: String
     ) = try {
         unitFile.readText().let {
             Json.decodeFromString<LearningUnitList>(it)
         }.learningUnits.map {
             LearningUnit(
                 learningAppPackage,
-                learningAppVersion,
                 it.unitId,
-                it.icon
+                it.icon,
+                it.additionalAssets
             )
         }.let { Result.Success(it) }
     } catch (e: Throwable) {
