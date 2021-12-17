@@ -7,11 +7,15 @@ import androidx.lifecycle.LiveData
 import com.eidu.integration.test.app.model.LearningApp
 import com.eidu.integration.test.app.model.LearningUnit
 import com.eidu.integration.test.app.ui.viewmodel.Result
+import com.eidu.integration.test.app.util.getStrings
+import com.eidu.integration.test.app.util.parseXml
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import net.dongliu.apk.parser.ApkFile
+import org.w3c.dom.Document
 import java.io.File
 import java.util.UUID
 import java.util.zip.ZipInputStream
@@ -38,7 +42,7 @@ class LearningPackageService @Inject constructor(
             .resolve("assets")
             .takeIf { it.exists() }
 
-    fun putLearningPackage(uri: Uri): Result<Unit> {
+    fun putLearningPackage(uri: Uri): Result<Unit> = try {
         val extractionDir = extractPackageFile(uri)
         val learningApp = readLearningAppMetadata(extractionDir)
         copyPackageContentToInternalFiles(learningApp.packageName, extractionDir)
@@ -48,7 +52,7 @@ class LearningPackageService @Inject constructor(
             learningApp.packageName
         )
 
-        return when (result) {
+        when (result) {
             is Result.Success<List<LearningUnit>> -> {
                 repository.replaceLearningUnits(
                     learningApp.packageName,
@@ -61,6 +65,8 @@ class LearningPackageService @Inject constructor(
             is Result.Error -> result
             else -> error("Unknown error.")
         }
+    } catch (e: Exception) {
+        Result.Error("Failed to read learning package: $e")
     }
 
     private fun getInternalFilesDir(
@@ -115,26 +121,24 @@ class LearningPackageService @Inject constructor(
 
     @OptIn(ExperimentalSerializationApi::class)
     private fun readLearningAppMetadata(extractionDir: File): LearningApp {
-        val appMetadataJson = extractionDir.resolve("application-metadata.json")
-            .readText().let { Json.decodeFromString<ApplicationMetadata>(it) }
-        val applicationName =
-            extractionDir.list { _, fileName -> fileName.endsWith("apk") }?.firstOrNull()?.let {
-                getApplicationLabelFromApk(extractionDir.resolve(it).path)
-            }
-        return LearningApp(
-            applicationName ?: "Unknown Application",
-            appMetadataJson.applicationPackage,
-            appMetadataJson.unitLaunchActivityClass
-        )
+        val file = extractionDir.listFiles { _, fileName -> fileName.endsWith("apk") }
+            ?.singleOrNull() ?: error("Not exactly one APK found.")
+
+        return parseApk(file)
     }
 
-    private fun getApplicationLabelFromApk(apkFilePath: String): String? {
-        return context.packageManager.getPackageArchiveInfo(apkFilePath, 0)?.also {
-            it.applicationInfo.sourceDir = apkFilePath
-            it.applicationInfo.publicSourceDir = apkFilePath
-        }?.let {
-            context.packageManager.getApplicationLabel(it.applicationInfo).toString()
-        }
+    private fun parseApk(apk: File) = parseManifest(parseXml(ApkFile(apk).manifestXml))
+
+    private fun parseManifest(manifest: Document): LearningApp {
+        val packageName = manifest.getStrings("/manifest/@package").single()
+        val label = manifest.getStrings("/manifest/application/@label").single()
+        val launchUnitActivity = manifest.getStrings(
+            "/manifest/application/activity" +
+                "[intent-filter/action/@name='com.eidu.integration.LAUNCH_LEARNING_UNIT']/@name"
+        ).singleOrNull()
+            ?: error("Did not find exactly one activity with an intent filter for action 'com.eidu.integration.LAUNCH_LEARNING_UNIT'.")
+
+        return LearningApp(label, packageName, launchUnitActivity)
     }
 
     private fun copyPackageContentToInternalFiles(
@@ -153,12 +157,6 @@ class LearningPackageService @Inject constructor(
     fun delete(learningApp: LearningApp) = repository.delete(learningApp)
     fun findByPackageName(name: String): LearningApp? = repository.findByPackageName(name)
 }
-
-@Serializable
-data class ApplicationMetadata(
-    val applicationPackage: String,
-    val unitLaunchActivityClass: String
-)
 
 @Serializable
 data class LearningUnitList(
