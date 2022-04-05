@@ -1,7 +1,6 @@
 package com.eidu.integration.test.app.ui.viewmodel
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
@@ -107,7 +106,6 @@ class LearningAppViewModel @Inject constructor(
     fun getLearningAppResult(): LiveData<Result<RunLearningUnitResult>> = _learningAppResult
 
     fun launchLearningAppUnit(
-        context: Context,
         learningApp: LearningApp,
         learningUnit: LearningUnit,
         learningAppLauncher: ActivityResultLauncher<Intent>,
@@ -119,18 +117,18 @@ class LearningAppViewModel @Inject constructor(
             learningUnit
         )
         navController.navigate("learning-apps/${learningApp.packageName}/result")
-        if (context.packageManager.resolveActivity(launchIntent, 0) != null) {
+        try {
             learningAppLauncher.launch(launchIntent)
-        } else {
+        } catch (e: Exception) {
             Log.w(
                 "LearningAppViewModel",
-                "launchLearningAppUnit: learning unit launch activity not found."
+                "launchLearningAppUnit: learning unit launch activity not found.",
+                e
             )
             _learningAppResult.postValue(
                 Result.Error(
-                    "Unable to launch learning unit ${learningUnit.unitId} because the activity" +
-                        " ${learningApp.packageName}/${learningApp.launchClass} could not be found. " +
-                        "Have you declared it in your AndroidManifest.xml file?"
+                    "Unable to launch learning unit ${learningUnit.unitId} using activity" +
+                        " ${learningApp.packageName}/${learningApp.launchClass} - details: $e"
                 )
             )
         }

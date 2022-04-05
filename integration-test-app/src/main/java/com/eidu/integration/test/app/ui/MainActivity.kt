@@ -90,7 +90,6 @@ class MainActivity : ComponentActivity() {
                                         learningUnits = unitLoadingState,
                                         { unit ->
                                             learningAppViewModel.launchLearningAppUnit(
-                                                applicationContext,
                                                 learningApp,
                                                 unit,
                                                 learningAppLauncher,
