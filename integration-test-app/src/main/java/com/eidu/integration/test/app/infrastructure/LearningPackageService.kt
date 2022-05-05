@@ -11,7 +11,6 @@ import com.eidu.integration.test.app.util.getStrings
 import com.eidu.integration.test.app.util.json
 import com.eidu.integration.test.app.util.parseXml
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import net.dongliu.apk.parser.ApkFile
@@ -79,7 +78,6 @@ class LearningPackageService @Inject constructor(
         return learningPackageDir.resolve("units.json")
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     private fun readLearningUnitsFromFile(
         unitFile: File,
         learningAppPackage: String
@@ -119,7 +117,6 @@ class LearningPackageService @Inject constructor(
         return extractionDir
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     private fun readLearningAppMetadata(extractionDir: File): LearningApp {
         val file = extractionDir.listFiles { _, fileName -> fileName.endsWith("apk") }
             ?.singleOrNull() ?: error("Not exactly one APK found.")
