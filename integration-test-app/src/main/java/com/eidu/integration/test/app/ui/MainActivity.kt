@@ -48,6 +48,14 @@ class MainActivity : ComponentActivity() {
         )
         val clipboardService = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
         val copyToClipboardToast = Toast.makeText(this, "Copied to clipboard!", Toast.LENGTH_SHORT)
+
+        learningAppViewModel.importStatus.observe(this) {
+            if (it is Result.Success<Unit>)
+                Toast.makeText(this, "Package loaded successfully.", Toast.LENGTH_LONG).show()
+            else if (it is Result.Error)
+                Toast.makeText(this, "Failed: ${it.reason}", Toast.LENGTH_LONG).show()
+        }
+
         setContent {
             val navController = rememberNavController()
             val goBack: () -> Unit = { navController.navigateUp() }
@@ -60,12 +68,12 @@ class MainActivity : ComponentActivity() {
 
                             LearningAppsScreen(
                                 learningApps.value,
+                                learningAppViewModel.importStatus,
                                 { learningApp -> navController.navigate("learning-apps/${learningApp.packageName}/units") },
                                 { learningApp -> learningAppViewModel.deleteLearningApp(learningApp) },
                                 { learningApp -> navController.navigate("learning-apps/${learningApp.packageName}/edit") },
-                                { packageFilePicker.launch(arrayOf("application/zip")) },
-                                { navController.navigate("learning-apps/create") }
-                            )
+                                { packageFilePicker.launch(arrayOf("application/zip")) }
+                            ) { navController.navigate("learning-apps/create") }
                         }
                         composable("learning-apps/{app}/units") { backStackEntry ->
                             when (val app: Result<LearningApp> = getAppNameState(backStackEntry)) {
@@ -170,7 +178,6 @@ class MainActivity : ComponentActivity() {
     private fun handleFilePicked(uri: Uri?) {
         if (uri != null)
             learningAppViewModel.handleLearningPackageFile(uri)
-                .observe(this) { Toast.makeText(this, it, Toast.LENGTH_LONG).show() }
     }
 
     @Composable

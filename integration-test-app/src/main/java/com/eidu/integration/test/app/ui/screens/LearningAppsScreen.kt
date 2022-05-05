@@ -28,6 +28,7 @@ import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -36,84 +37,95 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.eidu.integration.test.app.model.LearningApp
 import com.eidu.integration.test.app.ui.shared.EiduScaffold
+import com.eidu.integration.test.app.ui.shared.LoadingIndicator
 import com.eidu.integration.test.app.ui.shared.SAMPLE_APP_1
 import com.eidu.integration.test.app.ui.shared.SAMPLE_APP_2
+import com.eidu.integration.test.app.ui.viewmodel.Result
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun LearningAppsScreen(
     learningApps: List<LearningApp>,
+    importStatus: LiveData<Result<Unit>>,
     navigateToUnits: (app: LearningApp) -> Unit,
     deleteLearningApp: (app: LearningApp) -> Unit,
     editLearningApp: (app: LearningApp) -> Unit,
     openFilePicker: () -> Unit,
     addLearningApp: () -> Unit
 ) {
+    val loading by importStatus.observeAsState()
+
     EiduScaffold(
         floatingAction = {
             var addOptionsOpen by remember { mutableStateOf(false) }
-            Column(
-                horizontalAlignment = Alignment.End
-            ) {
-                if (addOptionsOpen) {
-                    ExtendedFloatingActionButton(
-                        onClick = openFilePicker,
-                        text = { Text(text = "Add learning package") },
-                        icon = {
-                            Icon(
-                                imageVector = Icons.Rounded.Add,
-                                contentDescription = "Add package"
-                            )
-                        }
-                    )
-                    Spacer(modifier = Modifier.height(5.dp))
-                    ExtendedFloatingActionButton(
-                        onClick = addLearningApp,
-                        text = { Text(text = "Add manually") },
-                        icon = {
-                            Icon(
-                                imageVector = Icons.Rounded.Add,
-                                contentDescription = "Add manually"
-                            )
-                        }
-                    )
-                    Spacer(modifier = Modifier.height(5.dp))
-                }
-                FloatingActionButton(
-                    onClick = { addOptionsOpen = !addOptionsOpen },
+            if (loading != Result.Loading)
+                Column(
+                    horizontalAlignment = Alignment.End
                 ) {
-                    Icon(imageVector = Icons.Rounded.Add, contentDescription = "Add App")
+                    if (addOptionsOpen) {
+                        ExtendedFloatingActionButton(
+                            onClick = openFilePicker,
+                            text = { Text(text = "Add learning package") },
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.Rounded.Add,
+                                    contentDescription = "Add package"
+                                )
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(5.dp))
+                        ExtendedFloatingActionButton(
+                            onClick = addLearningApp,
+                            text = { Text(text = "Add manually") },
+                            icon = {
+                                Icon(
+                                    imageVector = Icons.Rounded.Add,
+                                    contentDescription = "Add manually"
+                                )
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(5.dp))
+                    }
+                    FloatingActionButton(
+                        onClick = { addOptionsOpen = !addOptionsOpen },
+                    ) {
+                        Icon(imageVector = Icons.Rounded.Add, contentDescription = "Add App")
+                    }
                 }
-            }
         },
         title = { Text("Learning Apps") }
     ) {
-        Column {
-            ListItem(
-                text = {
-                    Text(
-                        "Upload your learning package to the device (e.g. `adb push learning-package.zip" +
-                            " /sdcard/Download`) and add your app through 'Add learning package' or" +
-                            " add an app manually if you don't have a learning package yet."
-                    )
-                },
-                icon = { Icon(Icons.Default.Info, "How to add learning package") }
-            )
-            Divider()
-            LazyColumn {
-                items(learningApps, { it.toString() }) {
-                    LearningAppRow(
-                        learningApp = it,
-                        { -> navigateToUnits(it) },
-                        { -> deleteLearningApp(it) },
-                        { -> editLearningApp(it) }
-                    )
-                    Divider()
+        if (loading == Result.Loading)
+            LoadingIndicator("Loading package. This may take a few minutes.")
+        else
+            Column {
+                ListItem(
+                    text = {
+                        Text(
+                            "Upload your learning package to the device (e.g. `adb push learning-package.zip" +
+                                " /sdcard/Download`) and add your app through 'Add learning package' or" +
+                                " add an app manually if you don't have a learning package yet."
+                        )
+                    },
+                    icon = { Icon(Icons.Default.Info, "How to add learning package") }
+                )
+                Divider()
+                LazyColumn {
+                    items(learningApps, { it.toString() }) {
+                        LearningAppRow(
+                            learningApp = it,
+                            { -> navigateToUnits(it) },
+                            { -> deleteLearningApp(it) },
+                            { -> editLearningApp(it) }
+                        )
+                        Divider()
+                    }
                 }
             }
-        }
     }
 }
 
@@ -178,10 +190,23 @@ fun LearningAppRow(
 private fun LearningAppScreenPreview() {
     LearningAppsScreen(
         learningApps = listOf(SAMPLE_APP_1, SAMPLE_APP_2),
+        importStatus = MutableLiveData(),
         navigateToUnits = {},
         deleteLearningApp = {},
         editLearningApp = {},
-        openFilePicker = {},
-        addLearningApp = {}
-    )
+        openFilePicker = {}
+    ) {}
+}
+
+@Preview(showBackground = true, device = Devices.NEXUS_5)
+@Composable
+private fun LearningAppScreenPreviewLoading() {
+    LearningAppsScreen(
+        learningApps = listOf(SAMPLE_APP_1, SAMPLE_APP_2),
+        importStatus = MutableLiveData(Result.Loading),
+        navigateToUnits = {},
+        deleteLearningApp = {},
+        editLearningApp = {},
+        openFilePicker = {}
+    ) {}
 }

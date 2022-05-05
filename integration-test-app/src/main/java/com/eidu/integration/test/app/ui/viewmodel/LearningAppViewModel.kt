@@ -29,6 +29,9 @@ class LearningAppViewModel @Inject constructor(
 
     private val _learningAppResult = MutableLiveData<Result<RunLearningUnitResult>>()
 
+    private val _importStatus = MutableLiveData<Result<Unit>>()
+    val importStatus: LiveData<Result<Unit>> = _importStatus
+
     fun getLearningApps(): LiveData<List<LearningApp>> = learningPackageService.listLive()
 
     fun putLearningApp(learningApp: LearningApp) =
@@ -89,18 +92,11 @@ class LearningAppViewModel @Inject constructor(
         }
     }
 
-    fun handleLearningPackageFile(uri: Uri): LiveData<String> {
-        val data = MutableLiveData<String>()
+    fun handleLearningPackageFile(uri: Uri) {
+        _importStatus.postValue(Result.Loading)
         viewModelScope.launch(Dispatchers.IO) {
-            data.postValue(
-                when (val result = learningPackageService.putLearningPackage(uri)) {
-                    is Result.Success -> "Package loaded successfully."
-                    is Result.Error -> "Failed: ${result.reason}"
-                    else -> "Failed."
-                }
-            )
+            _importStatus.postValue(learningPackageService.putLearningPackage(uri))
         }
-        return data
     }
 
     fun getLearningAppResult(): LiveData<Result<RunLearningUnitResult>> = _learningAppResult

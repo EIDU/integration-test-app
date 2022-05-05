@@ -45,7 +45,7 @@ fun LearningAppResultScreen(
                     )
                 }
             is Result.Loading ->
-                LoadingIndicator()
+                LoadingIndicator("Loading package. This may take a few minutes.")
             is Result.Error ->
                 LearningAppErrorDisplay(
                     error = learningAppResult,

@@ -54,7 +54,7 @@ fun LearningUnitsScreen(
                 }
             }
             is Result.Loading ->
-                LoadingIndicator()
+                LoadingIndicator("Loading package. This may take a few minutes.")
             is Result.NotFound ->
                 Column {
                     ListItem(
