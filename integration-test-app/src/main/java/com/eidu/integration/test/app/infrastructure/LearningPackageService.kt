@@ -100,18 +100,19 @@ class LearningPackageService @Inject constructor(
     private fun extractPackageFile(uri: Uri): File {
         val extractionDir = context.cacheDir.resolve(UUID.randomUUID().toString())
         extractionDir.mkdir()
-        context.contentResolver.openInputStream(uri)?.use {
-            val stream = ZipInputStream(it)
-            var entry = stream.nextEntry
+        ZipInputStream(
+            context.contentResolver.openInputStream(uri) ?: error("Failed to read from $uri")
+        ).use { zip ->
+            var entry = zip.nextEntry
             while (entry != null) {
                 if (!entry.isDirectory) {
                     Log.i("LearningPackageService", "Extracting file ${entry.name}")
-                    val extractTo = extractionDir.resolve(entry.name)
-                    extractTo.parentFile?.mkdirs()
-                    stream.copyTo(extractTo.outputStream())
+                    val destination = extractionDir.resolve(entry.name)
+                    destination.parentFile?.mkdirs()
+                    destination.outputStream().use { zip.copyTo(it) }
                 }
-                stream.closeEntry()
-                entry = stream.nextEntry
+                zip.closeEntry()
+                entry = zip.nextEntry
             }
         }
         return extractionDir
