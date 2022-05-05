@@ -76,7 +76,7 @@ class LearningPackageService @Inject constructor(
 
     private fun getLearningAppUnitFile(learningAppPackage: String): File {
         val learningPackageDir = getInternalFilesDir(context, learningAppPackage)
-        return learningPackageDir.resolve("learning-units.json")
+        return learningPackageDir.resolve("units.json")
     }
 
     @OptIn(ExperimentalSerializationApi::class)
@@ -86,17 +86,17 @@ class LearningPackageService @Inject constructor(
     ) = try {
         unitFile.readText().let {
             json.decodeFromString<LearningUnitList>(it)
-        }.learningUnits.map {
+        }.units.map {
             LearningUnit(
                 learningAppPackage,
-                it.unitId,
+                it.id,
                 it.icon,
-                it.additionalAssets
+                it.assets
             )
         }.let { Result.Success(it) }
     } catch (e: Throwable) {
         Log.e("LearningPackageService", "Unable to read units.", e)
-        Result.Error("Unable to read units from learning-units.json file. Error was: ${e.localizedMessage}")
+        Result.Error("Unable to read units from units.json file. Error was: ${e.localizedMessage}")
     }
 
     private fun extractPackageFile(uri: Uri): File {
@@ -160,12 +160,12 @@ class LearningPackageService @Inject constructor(
 
 @Serializable
 data class LearningUnitList(
-    val learningUnits: List<LearningUnitDefinition>
+    val units: List<LearningUnitDefinition>
 )
 
 @Serializable
 data class LearningUnitDefinition(
-    val unitId: String,
+    val id: String,
     val icon: String,
-    val additionalAssets: List<String>
+    val assets: List<String>
 )
