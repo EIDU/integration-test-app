@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import com.eidu.integration.test.app.model.LearningApp
 import com.eidu.integration.test.app.model.LearningUnit
 import com.eidu.integration.test.app.ui.viewmodel.Result
+import com.eidu.integration.test.app.util.fileEntries
 import com.eidu.integration.test.app.util.getStrings
 import com.eidu.integration.test.app.util.json
 import com.eidu.integration.test.app.util.parseXml
@@ -103,16 +104,11 @@ class LearningPackageService @Inject constructor(
         ZipInputStream(
             context.contentResolver.openInputStream(uri) ?: error("Failed to read from $uri")
         ).use { zip ->
-            var entry = zip.nextEntry
-            while (entry != null) {
-                if (!entry.isDirectory) {
-                    Log.i("LearningPackageService", "Extracting file ${entry.name}")
-                    val destination = extractionDir.resolve(entry.name)
-                    destination.parentFile?.mkdirs()
-                    destination.outputStream().use { zip.copyTo(it) }
-                }
-                zip.closeEntry()
-                entry = zip.nextEntry
+            zip.fileEntries().forEach { entry ->
+                Log.i("LearningPackageService", "Extracting file ${entry.name}")
+                val destination = extractionDir.resolve(entry.name)
+                requireNotNull(destination.parentFile).mkdirs()
+                destination.outputStream().use { zip.copyTo(it) }
             }
         }
         return extractionDir
