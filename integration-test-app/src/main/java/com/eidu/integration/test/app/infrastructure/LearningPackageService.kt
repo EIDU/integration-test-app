@@ -121,7 +121,7 @@ class LearningPackageService @Inject constructor(
         return parseApk(file)
     }
 
-    private fun parseApk(apk: File) = parseManifest(parseXml(ApkFile(apk).manifestXml))
+    private fun parseApk(apk: File) = parseManifest(parseXml(ApkFile(apk).use { it.manifestXml }))
 
     private fun parseManifest(manifest: Document): LearningApp {
         val packageName = manifest.getStrings("/manifest/@package").single()
