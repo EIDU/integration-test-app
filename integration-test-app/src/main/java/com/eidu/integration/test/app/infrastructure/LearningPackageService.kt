@@ -164,5 +164,5 @@ data class LearningUnitList(
 data class LearningUnitDefinition(
     val id: String,
     val icon: String,
-    val assets: List<String>
+    val assets: List<String> = emptyList()
 )
