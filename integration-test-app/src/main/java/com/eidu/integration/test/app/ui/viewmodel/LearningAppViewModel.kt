@@ -137,8 +137,8 @@ class LearningAppViewModel @Inject constructor(
             "Test Learner",
             "Test School",
             "test",
-            null,
-            null,
+            2 * 60 * 1000,
+            1 * 60 * 1000,
             AssetProvider.assetBaseUri(learningApp, learningUnit)
         ).toIntent(learningApp.packageName, learningApp.launchClass)
 
