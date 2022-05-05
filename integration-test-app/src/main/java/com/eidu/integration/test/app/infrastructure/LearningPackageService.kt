@@ -8,12 +8,12 @@ import com.eidu.integration.test.app.model.LearningApp
 import com.eidu.integration.test.app.model.LearningUnit
 import com.eidu.integration.test.app.ui.viewmodel.Result
 import com.eidu.integration.test.app.util.getStrings
+import com.eidu.integration.test.app.util.json
 import com.eidu.integration.test.app.util.parseXml
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 import net.dongliu.apk.parser.ApkFile
 import org.w3c.dom.Document
 import java.io.File
@@ -85,7 +85,7 @@ class LearningPackageService @Inject constructor(
         learningAppPackage: String
     ) = try {
         unitFile.readText().let {
-            Json.decodeFromString<LearningUnitList>(it)
+            json.decodeFromString<LearningUnitList>(it)
         }.learningUnits.map {
             LearningUnit(
                 learningAppPackage,
