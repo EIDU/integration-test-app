@@ -50,10 +50,13 @@ class MainActivity : ComponentActivity() {
         val copyToClipboardToast = Toast.makeText(this, "Copied to clipboard!", Toast.LENGTH_SHORT)
 
         learningAppViewModel.importStatus.observe(this) {
-            if (it is Result.Success<Unit>)
-                Toast.makeText(this, "Package loaded successfully.", Toast.LENGTH_LONG).show()
-            else if (it is Result.Error)
-                Toast.makeText(this, "Failed: ${it.reason}", Toast.LENGTH_LONG).show()
+            when (it) {
+                is Result.Success<Unit> ->
+                    Toast.makeText(this, "Package loaded successfully.", Toast.LENGTH_LONG).show()
+                is Result.Error ->
+                    Toast.makeText(this, "Failed: ${it.reason}", Toast.LENGTH_LONG).show()
+                Result.Loading, Result.NotFound -> Unit
+            }
         }
 
         setContent {
