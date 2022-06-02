@@ -32,6 +32,10 @@ class LearningAppViewModel @Inject constructor(
     private val _importStatus = MutableLiveData<Result<Unit>>()
     val importStatus: LiveData<Result<Unit>> = _importStatus
 
+    fun dismissStatus() {
+        _importStatus.postValue(null)
+    }
+
     fun getLearningApps(): LiveData<List<LearningApp>> = learningPackageService.listLive()
 
     fun putLearningApp(learningApp: LearningApp) =

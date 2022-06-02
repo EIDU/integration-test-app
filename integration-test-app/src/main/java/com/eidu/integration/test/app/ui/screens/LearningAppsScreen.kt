@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Divider
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
@@ -19,6 +20,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.ListItem
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.rounded.Add
@@ -51,18 +53,19 @@ import com.eidu.integration.test.app.ui.viewmodel.Result
 fun LearningAppsScreen(
     learningApps: List<LearningApp>,
     importStatus: LiveData<Result<Unit>>,
+    dismissStatus: () -> Unit,
     navigateToUnits: (app: LearningApp) -> Unit,
     deleteLearningApp: (app: LearningApp) -> Unit,
     editLearningApp: (app: LearningApp) -> Unit,
     openFilePicker: () -> Unit,
     addLearningApp: () -> Unit
 ) {
-    val loading by importStatus.observeAsState()
+    val currentStatus = importStatus.observeAsState().value
 
     EiduScaffold(
         floatingAction = {
             var addOptionsOpen by remember { mutableStateOf(false) }
-            if (loading != Result.Loading)
+            if (currentStatus != Result.Loading)
                 Column(
                     horizontalAlignment = Alignment.End
                 ) {
@@ -99,10 +102,28 @@ fun LearningAppsScreen(
         },
         title = { Text("Learning Apps") }
     ) {
-        if (loading == Result.Loading)
-            LoadingIndicator("Loading package. This may take a few minutes.")
-        else
-            Column {
+        when (currentStatus) {
+            Result.Loading -> LoadingIndicator("Loading package. This may take a few minutes.")
+            Result.NotFound -> error("Unexpected import status: NotFound")
+            is Result.Error ->
+                AlertDialog(
+                    onDismissRequest = dismissStatus,
+                    confirmButton = {
+                        TextButton(onClick = dismissStatus) { Text(text = "OK") }
+                    },
+                    title = { Text(text = "Error") },
+                    text = { Text(text = currentStatus.reason) }
+                )
+            is Result.Success ->
+                AlertDialog(
+                    onDismissRequest = dismissStatus,
+                    confirmButton = {
+                        TextButton(onClick = dismissStatus) { Text(text = "OK") }
+                    },
+                    title = { Text(text = "Success") },
+                    text = { Text(text = "Package imported successfully.") }
+                )
+            null -> Column {
                 ListItem(
                     text = {
                         Text(
@@ -112,7 +133,7 @@ fun LearningAppsScreen(
                                 "Note: You need to install the APK yourself!"
                         )
                     },
-                    icon = { Icon(Icons.Default.Info, "How to add learning package") }
+                    icon = { Icon(Icons.Default.Info, "How to add a learning package") }
                 )
                 Divider()
                 LazyColumn {
@@ -127,6 +148,7 @@ fun LearningAppsScreen(
                     }
                 }
             }
+        }
     }
 }
 
@@ -191,7 +213,8 @@ fun LearningAppRow(
 private fun LearningAppScreenPreview() {
     LearningAppsScreen(
         learningApps = listOf(SAMPLE_APP_1, SAMPLE_APP_2),
-        importStatus = MutableLiveData(),
+        importStatus = MutableLiveData(null),
+        dismissStatus = {},
         navigateToUnits = {},
         deleteLearningApp = {},
         editLearningApp = {},
@@ -205,6 +228,35 @@ private fun LearningAppScreenPreviewLoading() {
     LearningAppsScreen(
         learningApps = listOf(SAMPLE_APP_1, SAMPLE_APP_2),
         importStatus = MutableLiveData(Result.Loading),
+        dismissStatus = {},
+        navigateToUnits = {},
+        deleteLearningApp = {},
+        editLearningApp = {},
+        openFilePicker = {}
+    ) {}
+}
+
+@Preview(showBackground = true, device = Devices.NEXUS_5)
+@Composable
+private fun LearningAppScreenPreviewSuccess() {
+    LearningAppsScreen(
+        learningApps = listOf(SAMPLE_APP_1, SAMPLE_APP_2),
+        importStatus = MutableLiveData(Result.Success(Unit)),
+        dismissStatus = {},
+        navigateToUnits = {},
+        deleteLearningApp = {},
+        editLearningApp = {},
+        openFilePicker = {}
+    ) {}
+}
+
+@Preview(showBackground = true, device = Devices.NEXUS_5)
+@Composable
+private fun LearningAppScreenPreviewError() {
+    LearningAppsScreen(
+        learningApps = listOf(SAMPLE_APP_1, SAMPLE_APP_2),
+        importStatus = MutableLiveData(Result.Error("You fail it.")),
+        dismissStatus = {},
         navigateToUnits = {},
         deleteLearningApp = {},
         editLearningApp = {},

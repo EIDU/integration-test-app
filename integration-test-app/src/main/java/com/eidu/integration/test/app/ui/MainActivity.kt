@@ -49,16 +49,6 @@ class MainActivity : ComponentActivity() {
         val clipboardService = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
         val copyToClipboardToast = Toast.makeText(this, "Copied to clipboard!", Toast.LENGTH_SHORT)
 
-        learningAppViewModel.importStatus.observe(this) {
-            when (it) {
-                is Result.Success<Unit> ->
-                    Toast.makeText(this, "Package loaded successfully.", Toast.LENGTH_LONG).show()
-                is Result.Error ->
-                    Toast.makeText(this, "Failed: ${it.reason}", Toast.LENGTH_LONG).show()
-                Result.Loading, Result.NotFound -> Unit
-            }
-        }
-
         setContent {
             val navController = rememberNavController()
             val goBack: () -> Unit = { navController.navigateUp() }
@@ -72,6 +62,7 @@ class MainActivity : ComponentActivity() {
                             LearningAppsScreen(
                                 learningApps.value,
                                 learningAppViewModel.importStatus,
+                                learningAppViewModel::dismissStatus,
                                 { learningApp -> navController.navigate("learning-apps/${learningApp.packageName}/units") },
                                 { learningApp -> learningAppViewModel.deleteLearningApp(learningApp) },
                                 { learningApp -> navController.navigate("learning-apps/${learningApp.packageName}/edit") },
