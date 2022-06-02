@@ -99,7 +99,7 @@ dependencies {
     kapt("com.google.dagger:hilt-android-compiler:${Versions.hilt}")
 
     // EIDU dependencies
-    implementation("com.eidu:integration-library:1.7.0")
+    implementation("com.eidu:integration-library:1.8.0")
 
     implementation("net.dongliu:apk-parser:2.6.10")
 
