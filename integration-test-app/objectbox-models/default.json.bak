@@ -33,10 +33,48 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "2:7471124745139587462",
+      "lastPropertyId": "5:5378969612050800056",
+      "name": "LearningUnit",
+      "properties": [
+        {
+          "id": "1:7557662550462217145",
+          "name": "learningAppPackage",
+          "indexId": "2:2369718792465286955",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "2:1801696377670704778",
+          "name": "unitId",
+          "indexId": "3:1356999240135402228",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:6363264329472530704",
+          "name": "icon",
+          "type": 9
+        },
+        {
+          "id": "4:8126494568664983249",
+          "name": "additionalAssets",
+          "type": 30
+        },
+        {
+          "id": "5:5378969612050800056",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "1:4574749818706646570",
-  "lastIndexId": "1:1260631597519698058",
+  "lastEntityId": "2:7471124745139587462",
+  "lastIndexId": "3:1356999240135402228",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

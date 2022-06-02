@@ -36,7 +36,7 @@
     },
     {
       "id": "2:7471124745139587462",
-      "lastPropertyId": "5:5378969612050800056",
+      "lastPropertyId": "7:4643224511040937153",
       "name": "LearningUnit",
       "properties": [
         {
@@ -68,6 +68,16 @@
           "name": "id",
           "type": 6,
           "flags": 1
+        },
+        {
+          "id": "6:393515604719705544",
+          "name": "fields",
+          "type": 23
+        },
+        {
+          "id": "7:4643224511040937153",
+          "name": "tags",
+          "type": 9
         }
       ],
       "relations": []

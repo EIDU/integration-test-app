@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import com.eidu.integration.test.app.model.LearningApp
 import com.eidu.integration.test.app.model.LearningUnit
+import com.eidu.integration.test.app.model.Tags
 import com.eidu.integration.test.app.ui.viewmodel.Result
 import com.eidu.integration.test.app.util.fileEntries
 import com.eidu.integration.test.app.util.getStrings
@@ -90,6 +91,8 @@ class LearningPackageService @Inject constructor(
                 learningAppPackage,
                 it.id,
                 it.icon,
+                it.fields,
+                Tags(it.tags),
                 it.assets
             )
         }.let { Result.Success(it) }
@@ -161,5 +164,7 @@ data class LearningUnitList(
 data class LearningUnitDefinition(
     val id: String,
     val icon: String,
+    val fields: Map<String, String> = emptyMap(),
+    val tags: Map<String, Set<String>> = emptyMap(),
     val assets: List<String> = emptyList()
 )

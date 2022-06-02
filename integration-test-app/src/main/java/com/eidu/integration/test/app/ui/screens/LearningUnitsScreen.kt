@@ -24,11 +24,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.eidu.integration.test.app.model.LearningApp
 import com.eidu.integration.test.app.model.LearningUnit
+import com.eidu.integration.test.app.model.Tags
 import com.eidu.integration.test.app.ui.shared.EiduScaffold
 import com.eidu.integration.test.app.ui.shared.LoadingIndicator
 import com.eidu.integration.test.app.ui.shared.SAMPLE_APP_1
@@ -49,7 +49,7 @@ fun LearningUnitsScreen(
         when (learningUnits) {
             is Result.Success -> LazyColumn {
                 items(learningUnits.result, { it.toString() }) {
-                    LearningUnitRow(learningApp, learningUnit = it) { runUnit(it) }
+                    LearningUnitRow(learningUnit = it) { runUnit(it) }
                     Divider()
                 }
             }
@@ -89,13 +89,13 @@ fun LearningUnitsScreen(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun LearningUnitRow(learningApp: LearningApp, learningUnit: LearningUnit, runUnit: () -> Unit) {
+fun LearningUnitRow(learningUnit: LearningUnit, runUnit: () -> Unit) {
     ListItem(
         Modifier.clickable { runUnit() },
         text = { Text(learningUnit.unitId) },
         secondaryText = {
             Row {
-                Text(learningApp.name, fontWeight = FontWeight.ExtraBold)
+                Text(learningUnit.fields["title"] ?: "(no title)")
             }
         },
         trailing = {
@@ -122,7 +122,7 @@ private fun RunManualContentUnit(
     )
     Button(
         onClick = {
-            runUnit(LearningUnit(learningApp.packageName, unitId, "", emptyList()))
+            runUnit(LearningUnit(learningApp.packageName, unitId, "", emptyMap(), Tags(emptyMap()), emptyList()))
         },
         modifier = Modifier
             .fillMaxWidth()
@@ -157,5 +157,14 @@ private fun LearningUnitListErrorPreview() {
 }
 
 private fun sampleLearningUnits(): List<LearningUnit> = (1..20).map {
-    LearningUnit(SAMPLE_APP_1.packageName, "Unit-$it", "sample.png", emptyList())
+    LearningUnit(
+        SAMPLE_APP_1.packageName,
+        "Unit-$it",
+        "sample.png",
+        mapOf(
+            "title" to "Unit $it: title"
+        ),
+        Tags(emptyMap()),
+        emptyList()
+    )
 }
