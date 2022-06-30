@@ -26,9 +26,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.eidu.content.learningpackages.domain.LearningUnit
 import com.eidu.integration.test.app.model.LearningApp
-import com.eidu.integration.test.app.model.LearningUnit
-import com.eidu.integration.test.app.model.Tags
 import com.eidu.integration.test.app.ui.shared.EiduScaffold
 import com.eidu.integration.test.app.ui.shared.LoadingIndicator
 import com.eidu.integration.test.app.ui.shared.SAMPLE_APP_1
@@ -66,7 +65,7 @@ fun LearningUnitsScreen(
                             )
                         }
                     )
-                    RunManualContentUnit(learningApp = learningApp, runUnit = runUnit)
+                    RunManualContentUnit(runUnit = runUnit)
                 }
 
             is Result.Error -> {
@@ -80,7 +79,7 @@ fun LearningUnitsScreen(
                             )
                         }
                     )
-                    RunManualContentUnit(learningApp = learningApp, runUnit = runUnit)
+                    RunManualContentUnit(runUnit = runUnit)
                 }
             }
         }
@@ -92,10 +91,10 @@ fun LearningUnitsScreen(
 fun LearningUnitRow(learningUnit: LearningUnit, runUnit: () -> Unit) {
     ListItem(
         Modifier.clickable { runUnit() },
-        text = { Text(learningUnit.unitId) },
+        text = { Text(learningUnit.id) },
         secondaryText = {
             Row {
-                Text(learningUnit.fields["title"] ?: "(no title)")
+                Text(learningUnit.title ?: "(no title)")
             }
         },
         trailing = {
@@ -108,7 +107,6 @@ fun LearningUnitRow(learningUnit: LearningUnit, runUnit: () -> Unit) {
 
 @Composable
 private fun RunManualContentUnit(
-    learningApp: LearningApp,
     runUnit: (LearningUnit) -> Unit
 ) {
     var unitId by remember { mutableStateOf("") }
@@ -122,7 +120,7 @@ private fun RunManualContentUnit(
     )
     Button(
         onClick = {
-            runUnit(LearningUnit(learningApp.packageName, unitId, "", emptyMap(), Tags(emptyMap()), emptyList()))
+            runUnit(LearningUnit(unitId))
         },
         modifier = Modifier
             .fillMaxWidth()
@@ -158,13 +156,10 @@ private fun LearningUnitListErrorPreview() {
 
 private fun sampleLearningUnits(): List<LearningUnit> = (1..20).map {
     LearningUnit(
-        SAMPLE_APP_1.packageName,
         "Unit-$it",
         "sample.png",
-        mapOf(
+        fields = mapOf(
             "title" to "Unit $it: title"
-        ),
-        Tags(emptyMap()),
-        emptyList()
+        )
     )
 }

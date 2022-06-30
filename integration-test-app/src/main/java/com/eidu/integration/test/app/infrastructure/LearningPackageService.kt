@@ -2,24 +2,15 @@ package com.eidu.integration.test.app.infrastructure
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.LiveData
+import com.eidu.content.learningpackages.LearningPackage
 import com.eidu.integration.test.app.model.LearningApp
-import com.eidu.integration.test.app.model.LearningUnit
-import com.eidu.integration.test.app.model.Tags
 import com.eidu.integration.test.app.ui.viewmodel.Result
-import com.eidu.integration.test.app.util.fileEntries
-import com.eidu.integration.test.app.util.getStrings
-import com.eidu.integration.test.app.util.json
-import com.eidu.integration.test.app.util.parseXml
+import com.eidu.integration.test.app.util.AsyncCache
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
-import net.dongliu.apk.parser.ApkFile
-import org.w3c.dom.Document
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
-import java.util.UUID
-import java.util.zip.ZipInputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -28,143 +19,57 @@ class LearningPackageService @Inject constructor(
     @ApplicationContext private val context: Context,
     private val repository: LearningAppRepository
 ) {
+    private val learningPackageCache = AsyncCache<String, LearningPackage>(
+        3,
+        { withContext(Dispatchers.IO) { LearningPackage(internalLearningPackageFile(it)) } },
+        { it.close() }
+    )
 
-    fun getLearningUnits(learningAppPackage: String): List<LearningUnit> =
-        repository.getLearningUnits(learningAppPackage)
-
-    fun getAsset(learningAppPackage: String, filePath: String, unitId: String): File? =
-        if (repository.findUnit(learningAppPackage, unitId)?.allowsAsset(filePath) == true)
-            getAssetsDir(learningAppPackage)?.resolve(filePath)?.takeIf { it.isFile }
-        else
-            null
-
-    private fun getAssetsDir(learningAppPackage: String): File? =
-        getInternalFilesDir(context, learningAppPackage)
-            .resolve("assets")
-            .takeIf { it.exists() }
+    suspend fun getLearningPackage(learningAppPackage: String): LearningPackage =
+        learningPackageCache.get(learningAppPackage)
 
     fun putLearningPackage(uri: Uri): Result<Unit> = try {
-        val extractionDir = extractPackageFile(uri)
-        val learningApp = readLearningAppMetadata(extractionDir)
-        copyPackageContentToInternalFiles(learningApp.packageName, extractionDir)
-
-        val result = readLearningUnitsFromFile(
-            getLearningAppUnitFile(learningApp.packageName),
-            learningApp.packageName
-        )
-
-        when (result) {
-            is Result.Success<List<LearningUnit>> -> {
-                repository.replaceLearningUnits(
-                    learningApp.packageName,
-                    result.result
-                )
-
-                repository.put(learningApp)
-                Result.Success(Unit)
+        val tempFile = context.cacheDir.resolve("import.zip").also {
+            it.outputStream().use { output ->
+                context.contentResolver.openInputStream(uri).use { input ->
+                    input!!.copyTo(output)
+                }
             }
-            is Result.Error -> result
-            else -> error("Unknown error.")
         }
+        try {
+            val meta = LearningPackage(tempFile).use {
+                validateLearningPackage(it)
+                it.meta
+            }
+
+            storeLearningPackage(meta.app.appId, tempFile)
+
+            repository.put(LearningApp(meta.app.appId, meta.app.appId, meta.launchUnitActivity))
+        } finally {
+            tempFile.delete()
+        }
+        Result.Success(Unit)
     } catch (e: Exception) {
         Result.Error("Failed to read learning package: $e")
     }
 
-    private fun getInternalFilesDir(
-        context: Context,
-        learningAppPackage: String
-    ) = context.filesDir.resolve(learningAppPackage)
+    private fun storeLearningPackage(appId: String, file: File) =
+        file.copyTo(internalLearningPackageFile(appId), overwrite = true)
 
-    private fun getLearningAppUnitFile(learningAppPackage: String): File {
-        val learningPackageDir = getInternalFilesDir(context, learningAppPackage)
-        return learningPackageDir.resolve("units.json")
-    }
-
-    private fun readLearningUnitsFromFile(
-        unitFile: File,
-        learningAppPackage: String
-    ) = try {
-        unitFile.readText().let {
-            json.decodeFromString<LearningUnitList>(it)
-        }.units.map {
-            LearningUnit(
-                learningAppPackage,
-                it.id,
-                it.icon,
-                it.fields,
-                Tags(it.tags),
-                it.assets
-            )
-        }.let { Result.Success(it) }
-    } catch (e: Throwable) {
-        Log.e("LearningPackageService", "Unable to read units.", e)
-        Result.Error("Unable to read units from units.json file. Error was: ${e.localizedMessage}")
-    }
-
-    private fun extractPackageFile(uri: Uri): File {
-        val extractionDir = context.cacheDir.resolve(UUID.randomUUID().toString())
-        extractionDir.mkdir()
-        ZipInputStream(
-            context.contentResolver.openInputStream(uri) ?: error("Failed to read from $uri")
-        ).use { zip ->
-            zip.fileEntries().forEach { entry ->
-                Log.i("LearningPackageService", "Extracting file ${entry.name}")
-                val destination = extractionDir.resolve(entry.name)
-                requireNotNull(destination.parentFile).mkdirs()
-                destination.outputStream().use { zip.copyTo(it) }
-            }
-        }
-        return extractionDir
-    }
-
-    private fun readLearningAppMetadata(extractionDir: File): LearningApp {
-        val file = extractionDir.listFiles { _, fileName -> fileName.endsWith("apk") }
-            ?.singleOrNull() ?: error("Not exactly one APK found.")
-
-        return parseApk(file)
-    }
-
-    private fun parseApk(apk: File) = parseManifest(parseXml(ApkFile(apk).use { it.manifestXml }))
-
-    private fun parseManifest(manifest: Document): LearningApp {
-        val packageName = manifest.getStrings("/manifest/@package").single()
-        val label = manifest.getStrings("/manifest/application/@label").single()
-        val launchUnitActivity = manifest.getStrings(
-            "/manifest/application/activity" +
-                "[intent-filter/action/@name='com.eidu.integration.LAUNCH_LEARNING_UNIT']/@name"
-        ).singleOrNull()
-            ?: error("Did not find exactly one activity with an intent filter for action 'com.eidu.integration.LAUNCH_LEARNING_UNIT'.")
-
-        return LearningApp(label, packageName, launchUnitActivity)
-    }
-
-    private fun copyPackageContentToInternalFiles(
-        learningAppPackage: String,
-        extractionDir: File
-    ) {
-        val internalLearningAppDir = getInternalFilesDir(context, learningAppPackage)
-        internalLearningAppDir.deleteRecursively()
-        internalLearningAppDir.mkdirs()
-        extractionDir.copyRecursively(internalLearningAppDir, overwrite = true)
-        extractionDir.deleteRecursively()
+    private fun validateLearningPackage(learningPackage: LearningPackage) {
+        learningPackage.learningUnitList
+        learningPackage.assets
+        learningPackage.icons
     }
 
     fun listLive(): LiveData<List<LearningApp>> = repository.listLive()
     fun put(learningApp: LearningApp) = repository.put(learningApp)
     fun delete(learningApp: LearningApp) = repository.delete(learningApp)
     fun findByPackageName(name: String): LearningApp? = repository.findByPackageName(name)
+
+    private fun internalLearningPackageFile(packageName: String): File =
+        internalLearningPackageDirectory().resolve("$packageName.zip")
+
+    private fun internalLearningPackageDirectory(): File =
+        context.filesDir.resolve("packages").also { it.mkdirs() }
 }
-
-@Serializable
-data class LearningUnitList(
-    val units: List<LearningUnitDefinition>
-)
-
-@Serializable
-data class LearningUnitDefinition(
-    val id: String,
-    val icon: String,
-    val fields: Map<String, String> = emptyMap(),
-    val tags: Map<String, Set<String>> = emptyMap(),
-    val assets: List<String> = emptyList()
-)

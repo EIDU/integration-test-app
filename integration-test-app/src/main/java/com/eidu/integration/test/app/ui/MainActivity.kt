@@ -112,7 +112,6 @@ class MainActivity : ComponentActivity() {
                                     val appResult = learningAppViewModel.getLearningAppResult()
                                         .observeAsState(initial = Result.Loading)
                                     LearningAppResultScreen(
-                                        learningApp = app.result,
                                         learningAppResult = appResult.value,
                                         { label, text ->
                                             clipboardService.setPrimaryClip(

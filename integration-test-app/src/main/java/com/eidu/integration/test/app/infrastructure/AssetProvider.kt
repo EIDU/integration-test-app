@@ -6,12 +6,14 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import android.webkit.MimeTypeMap
+import com.eidu.content.learningpackages.LearningPackage
+import com.eidu.content.learningpackages.domain.LearningUnit
 import com.eidu.integration.test.app.model.LearningApp
-import com.eidu.integration.test.app.model.LearningUnit
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.io.FileNotFoundException
 
@@ -45,9 +47,29 @@ class AssetProvider : ContentProvider() {
         val filePath = uri.pathSegments.drop(1).joinToString("/")
         val unitId = uri.getQueryParameter("unit") ?: throw FileNotFoundException("No unit ID in $uri")
 
-        return hiltEntryPoint.learningPackageService().getAsset(learningAppPackage, filePath, unitId)
-            ?: throw FileNotFoundException(uri.toString())
+        val learningPackage = runBlocking {
+            hiltEntryPoint.learningPackageService().getLearningPackage(learningAppPackage)
+        }
+
+        val unit = learningPackage.learningUnitList.units.single { it.id == unitId }
+        if (unit.mayAccessAsset(filePath))
+            return assetFile(learningAppPackage, filePath, learningPackage)
+        else
+            throw FileNotFoundException(uri.toString())
     }
+
+    private fun assetFile(
+        learningAppPackage: String,
+        filePath: String,
+        learningPackage: LearningPackage
+    ) =
+        tempAssetFile(learningAppPackage, filePath).also { tempFile ->
+            learningPackage.readAsset(filePath).use { input ->
+                tempFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+        }
 
     override fun query(
         uri: Uri,
@@ -70,12 +92,15 @@ class AssetProvider : ContentProvider() {
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int =
         throw UnsupportedOperationException("Deletion is not supported.")
 
+    private fun tempAssetFile(learningPackage: String, asset: String) =
+        context!!.cacheDir.resolve("temp-assets/$learningPackage/$asset").also { it.parentFile!!.mkdirs() }
+
     companion object {
         fun assetBaseUri(app: LearningApp, unit: LearningUnit): Uri = Uri.Builder()
             .scheme("content")
             .authority("com.eidu.integration.test.app.assets")
             .path(app.packageName)
-            .appendQueryParameter("unit", unit.unitId)
+            .appendQueryParameter("unit", unit.id)
             .build()
     }
 }

@@ -1,3 +1,4 @@
+import extensions.getLocalProperty
 import extensions.getLocalPropertyOrNull
 import utils.getAppVersion
 import utils.toVersionCode
@@ -76,6 +77,23 @@ android {
     }
 }
 
+repositories {
+    google()
+    mavenCentral()
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/EIDU/integration-test-app")
+        credentials {
+            username = System.getenv("READPACKAGES_GITHUB_USER")
+                ?: System.getenv("GITHUB_READPACKAGES_USER")
+                ?: getLocalProperty("githubReadPackagesUser")
+            password = System.getenv("READPACKAGES_GITHUB_TOKEN")
+                ?: System.getenv("GITHUB_READPACKAGES_TOKEN")
+                ?: getLocalProperty("githubReadPackagesToken")
+        }
+    }
+}
+
 dependencies {
     implementation("androidx.core:core-ktx:1.7.0")
     implementation("androidx.appcompat:appcompat:1.4.0")
@@ -100,8 +118,7 @@ dependencies {
 
     // EIDU dependencies
     implementation("com.eidu:integration-library:1.8.0")
-
-    implementation("net.dongliu:apk-parser:2.6.10")
+    implementation("com.eidu:learning-packages:1.0.3")
 
     // Test
     testImplementation("junit:junit:4.13.2")

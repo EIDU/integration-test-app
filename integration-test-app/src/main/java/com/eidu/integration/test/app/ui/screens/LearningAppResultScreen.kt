@@ -12,16 +12,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.eidu.integration.ResultItem
 import com.eidu.integration.RunLearningUnitResult
-import com.eidu.integration.test.app.model.LearningApp
 import com.eidu.integration.test.app.ui.shared.EiduScaffold
 import com.eidu.integration.test.app.ui.shared.LearningAppErrorDisplay
 import com.eidu.integration.test.app.ui.shared.LoadingIndicator
-import com.eidu.integration.test.app.ui.shared.SAMPLE_APP_1
 import com.eidu.integration.test.app.ui.viewmodel.Result
 
 @Composable
 fun LearningAppResultScreen(
-    learningApp: LearningApp,
     learningAppResult: Result<RunLearningUnitResult>,
     copyToClipboard: (String, String) -> Unit,
     goToEditScreen: () -> Unit,
@@ -53,7 +50,6 @@ fun LearningAppResultScreen(
             is Result.Error ->
                 LearningAppErrorDisplay(
                     error = learningAppResult,
-                    learningApp = learningApp,
                     navigateToEditScreen = goToEditScreen
                 )
             is Result.NotFound ->
@@ -89,7 +85,6 @@ private fun ResultFields(fields: List<Pair<String, String?>>, copyToClipboard: (
 @Preview
 private fun LearningAppResultScreenPreview() {
     LearningAppResultScreen(
-        SAMPLE_APP_1,
         Result.Success(
             RunLearningUnitResult.ofSuccess(
                 1.0f,
@@ -111,7 +106,6 @@ private fun LearningAppResultScreenPreview() {
 @Preview
 private fun LearningAppResultScreenWithoutItemListPreview() {
     LearningAppResultScreen(
-        SAMPLE_APP_1,
         Result.Success(
             RunLearningUnitResult.ofSuccess(
                 1.0f,
@@ -130,7 +124,6 @@ private fun LearningAppResultScreenWithoutItemListPreview() {
 @Preview
 private fun LearningAppResultScreenWithEmptyItemListPreview() {
     LearningAppResultScreen(
-        SAMPLE_APP_1,
         Result.Success(
             RunLearningUnitResult.ofSuccess(
                 1.0f,

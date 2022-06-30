@@ -11,12 +11,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import com.eidu.content.learningpackages.domain.LearningUnit
 import com.eidu.integration.RunLearningUnitRequest
 import com.eidu.integration.RunLearningUnitResult
 import com.eidu.integration.test.app.infrastructure.AssetProvider
 import com.eidu.integration.test.app.infrastructure.LearningPackageService
 import com.eidu.integration.test.app.model.LearningApp
-import com.eidu.integration.test.app.model.LearningUnit
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -64,11 +64,11 @@ class LearningAppViewModel @Inject constructor(
     fun getLearningUnitsByPackageName(name: String): LiveData<Result<List<LearningUnit>>> {
         val data = MutableLiveData<Result<List<LearningUnit>>>(Result.Loading)
         viewModelScope.launch(Dispatchers.IO) {
-            val units = learningPackageService.getLearningUnits(name).takeIf { it.isNotEmpty() }
-            if (units != null)
-                data.postValue(Result.Success(units))
-            else
-                data.postValue(Result.NotFound)
+            try {
+                data.postValue(Result.Success(learningPackageService.getLearningPackage(name).learningUnitList.units))
+            } catch (e: Exception) {
+                data.postValue(Result.Error(e.message ?: "Unknown error"))
+            }
         }
         return data
     }
@@ -127,7 +127,7 @@ class LearningAppViewModel @Inject constructor(
             )
             _learningAppResult.postValue(
                 Result.Error(
-                    "Unable to launch learning unit ${learningUnit.unitId} using activity" +
+                    "Unable to launch learning unit ${learningUnit.id} using activity" +
                         " ${learningApp.packageName}/${learningApp.launchClass} - details: $e"
                 )
             )
@@ -136,13 +136,13 @@ class LearningAppViewModel @Inject constructor(
 
     private fun getLaunchIntent(learningApp: LearningApp, learningUnit: LearningUnit) =
         RunLearningUnitRequest.of(
-            learningUnit.unitId,
+            learningUnit.id,
             "Test Run",
             "Test Learner",
             "Test School",
             "test",
-            2 * 60 * 1000,
-            1 * 60 * 1000,
+            2 * 60 * 1000L,
+            1 * 60 * 1000L,
             AssetProvider.assetBaseUri(learningApp, learningUnit)
         ).toIntent(learningApp.packageName, learningApp.launchClass)
 

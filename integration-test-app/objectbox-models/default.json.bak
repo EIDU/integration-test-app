@@ -35,36 +35,46 @@
       "relations": []
     },
     {
-      "id": "2:7471124745139587462",
-      "lastPropertyId": "5:5378969612050800056",
-      "name": "LearningUnit",
+      "id": "3:4661588753715891169",
+      "lastPropertyId": "7:3345242002825358630",
+      "name": "PersistentLearningUnit",
       "properties": [
         {
-          "id": "1:7557662550462217145",
+          "id": "1:2285896839655684117",
           "name": "learningAppPackage",
-          "indexId": "2:2369718792465286955",
+          "indexId": "4:6935083835731808405",
           "type": 9,
           "flags": 2048
         },
         {
-          "id": "2:1801696377670704778",
+          "id": "2:4532715591685547258",
           "name": "unitId",
-          "indexId": "3:1356999240135402228",
+          "indexId": "5:4810002860925750846",
           "type": 9,
           "flags": 2048
         },
         {
-          "id": "3:6363264329472530704",
+          "id": "3:8515499604408022190",
           "name": "icon",
           "type": 9
         },
         {
-          "id": "4:8126494568664983249",
+          "id": "4:658603924778897023",
+          "name": "fields",
+          "type": 23
+        },
+        {
+          "id": "5:4628202122126543269",
+          "name": "tags",
+          "type": 9
+        },
+        {
+          "id": "6:3679972836543868228",
           "name": "additionalAssets",
           "type": 30
         },
         {
-          "id": "5:5378969612050800056",
+          "id": "7:3345242002825358630",
           "name": "id",
           "type": 6,
           "flags": 1
@@ -73,15 +83,28 @@
       "relations": []
     }
   ],
-  "lastEntityId": "2:7471124745139587462",
-  "lastIndexId": "3:1356999240135402228",
+  "lastEntityId": "3:4661588753715891169",
+  "lastIndexId": "5:4810002860925750846",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,
-  "retiredEntityUids": [],
-  "retiredIndexUids": [],
-  "retiredPropertyUids": [],
+  "retiredEntityUids": [
+    7471124745139587462
+  ],
+  "retiredIndexUids": [
+    2369718792465286955,
+    1356999240135402228
+  ],
+  "retiredPropertyUids": [
+    7557662550462217145,
+    1801696377670704778,
+    6363264329472530704,
+    8126494568664983249,
+    5378969612050800056,
+    393515604719705544,
+    4643224511040937153
+  ],
   "retiredRelationUids": [],
   "version": 1
 }
