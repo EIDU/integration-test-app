@@ -17,12 +17,17 @@
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.EIDUIntegrationTestApp.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="eidu" />
             </intent-filter>
         </activity>
 
@@ -31,6 +36,5 @@
             android:name=".infrastructure.AssetProvider"
             android:exported="true"
             tools:ignore="ExportedContentProvider" />
-
     </application>
 </manifest>

@@ -19,6 +19,11 @@ import com.eidu.integration.test.app.infrastructure.LearningPackageService
 import com.eidu.integration.test.app.model.LearningApp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -104,6 +109,33 @@ class LearningAppViewModel @Inject constructor(
     }
 
     fun getLearningAppResult(): LiveData<Result<RunLearningUnitResult>> = _learningAppResult
+
+    @OptIn(FlowPreview::class)
+    fun launchLearningAppUnit(
+        unitId: String,
+        learningAppLauncher: ActivityResultLauncher<Intent>,
+        navController: NavController
+    ) = viewModelScope.launch {
+        val learningAppAndUnit = findUnit(unitId)
+
+        if (learningAppAndUnit != null) {
+            val (learningApp, learningUnit) = learningAppAndUnit
+
+            launchLearningAppUnit(
+                learningApp,
+                learningUnit,
+                learningAppLauncher,
+                navController
+            )
+        }
+    }
+
+    @OptIn(FlowPreview::class)
+    private suspend fun findUnit(unitId: String) =
+        learningPackageService.list().asFlow().flatMapConcat { app ->
+            learningPackageService.getLearningPackage(app.packageName).learningUnitList.units.asFlow()
+                .map { app to it }
+        }.firstOrNull { (_, unit) -> unit.id == unitId }
 
     fun launchLearningAppUnit(
         learningApp: LearningApp,

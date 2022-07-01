@@ -63,6 +63,7 @@ class LearningPackageService @Inject constructor(
     }
 
     fun listLive(): LiveData<List<LearningApp>> = repository.listLive()
+    fun list(): List<LearningApp> = repository.list()
     fun put(learningApp: LearningApp) = repository.put(learningApp)
     fun delete(learningApp: LearningApp) = repository.delete(learningApp)
     fun findByPackageName(name: String): LearningApp? = repository.findByPackageName(name)

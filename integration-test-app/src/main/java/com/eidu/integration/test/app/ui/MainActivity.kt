@@ -2,12 +2,14 @@ package com.eidu.integration.test.app.ui
 
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.material.CircularProgressIndicator
@@ -18,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -51,6 +54,9 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val navController = rememberNavController()
+
+            handleLaunchUnitLink(navController, learningAppLauncher)
+
             val goBack: () -> Unit = { navController.navigateUp() }
             EIDUIntegrationTestAppTheme {
                 Surface(color = MaterialTheme.colors.background) {
@@ -161,6 +167,18 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    private fun handleLaunchUnitLink(
+        navController: NavHostController,
+        learningAppLauncher: ActivityResultLauncher<Intent>
+    ) {
+        val uri = intent.data
+        val path = uri?.path
+        if (path != null && uri.authority == "launch-unit") {
+            val unitId = path.trim('/').split(':', limit = 2)[1]
+            learningAppViewModel.launchLearningAppUnit(unitId, learningAppLauncher, navController)
         }
     }
 

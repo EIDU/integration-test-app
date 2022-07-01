@@ -23,6 +23,7 @@ class LearningAppRepository @Inject constructor(
 
     private val learningApps = store.boxFor<LearningApp>()
 
+    fun list(): List<LearningApp> = learningApps.query { order(LearningApp_.name) }.find()
     fun listLive(): LiveData<List<LearningApp>> = ObjectBoxLiveData(learningApps.query { order(LearningApp_.name) })
 
     fun findByPackageName(packageName: String): LearningApp? =
