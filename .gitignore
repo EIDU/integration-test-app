@@ -11,3 +11,4 @@
 .externalNativeBuild
 .cxx
 mixpanel-android/build
+*.keystore
