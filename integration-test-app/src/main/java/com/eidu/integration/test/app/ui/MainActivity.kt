@@ -108,6 +108,7 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
                                 is Result.NotFound -> navController.navigate("learning-apps")
+                                is Result.Error -> {}
                             }
                         }
                         composable("learning-apps/{app}/result") { backStackEntry ->
@@ -134,6 +135,7 @@ class MainActivity : ComponentActivity() {
                                         goBack
                                     )
                                 }
+                                is Result.Error -> {}
                             }
                         }
                         composable("learning-apps/create") {
@@ -162,6 +164,7 @@ class MainActivity : ComponentActivity() {
                                         goBack
                                     )
                                 }
+                                is Result.Error -> {}
                             }
                         }
                     }

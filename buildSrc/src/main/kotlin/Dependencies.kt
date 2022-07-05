@@ -7,11 +7,11 @@ object Apps {
 }
 
 object Versions {
-    const val androidGradle = "7.0.3"
-    const val kotlin = "1.5.31"
-    const val compose = "1.1.0-beta03"
-    const val objectBox = "3.0.1"
-    const val navigation = "2.4.0-beta02"
-    const val ktlintGradle = "10.2.0"
-    const val hilt = "2.40.3"
+    const val androidGradle = "7.2.1"
+    const val kotlin = "1.7.0"
+    const val compose = "1.1.1"
+    const val objectBox = "3.2.0"
+    const val navigation = "2.5.0"
+    const val ktlintGradle = "10.3.0"
+    const val hilt = "2.42"
 }
