@@ -33,7 +33,7 @@ jobs:
         run: git fetch --tags -f
 
       - name: Lint and test
-        run: ./gradlew ktlintCheck ktlintTestSourceSetCheck ktlintAndroidTestSourceSetCheck lintRelease testReleaseUnitTest --stacktrace
+        run: ./gradlew ktlintCheck ktlintTestSourceSetCheck ktlintAndroidTestSourceSetCheck lintRelease --stacktrace
 
       - name: Publish test reports
         uses: actions/upload-artifact@v1
