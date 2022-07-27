@@ -47,8 +47,11 @@ fun LearningUnitsScreen(
     ) {
         when (learningUnits) {
             is Result.Success -> LazyColumn {
-                items(learningUnits.result, { it.toString() }) {
-                    LearningUnitRow(learningUnit = it) { runUnit(it) }
+                items(
+                    learningUnits.result.zip(0..Int.MAX_VALUE),
+                    { it.first.toString() }
+                ) { (unit, index) ->
+                    LearningUnitRow(index = index, learningUnit = unit) { runUnit(unit) }
                     Divider()
                 }
             }
@@ -88,10 +91,10 @@ fun LearningUnitsScreen(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun LearningUnitRow(learningUnit: LearningUnit, runUnit: () -> Unit) {
+fun LearningUnitRow(index: Int, learningUnit: LearningUnit, runUnit: () -> Unit) {
     ListItem(
         Modifier.clickable { runUnit() },
-        text = { Text(learningUnit.id) },
+        text = { Text("$index: " + learningUnit.id) },
         secondaryText = {
             Row {
                 Text(learningUnit.title ?: "(no title)")
