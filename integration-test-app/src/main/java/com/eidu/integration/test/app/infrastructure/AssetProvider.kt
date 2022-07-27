@@ -54,18 +54,19 @@ class AssetProvider : ContentProvider() {
         val unit = learningPackage.learningUnitList.units.single { it.id == unitId }
         if (unit.mayAccessAsset(filePath))
             return assetFile(learningAppPackage, filePath, learningPackage)
+                ?: throw FileNotFoundException("Asset '$uri' does not exist.")
         else
-            throw FileNotFoundException(uri.toString())
+            throw FileNotFoundException("Asset '$uri' is not accessible by unit '$unitId'.")
     }
 
     private fun assetFile(
         learningAppPackage: String,
         filePath: String,
         learningPackage: LearningPackage
-    ) =
-        tempAssetFile(learningAppPackage, filePath).also { tempFile ->
-            learningPackage.readAsset(filePath).use { input ->
-                tempFile.outputStream().use { output ->
+    ): File? =
+        learningPackage.readAsset(filePath)?.use { input ->
+            tempAssetFile(learningAppPackage, filePath).also {
+                it.outputStream().use { output ->
                     input.copyTo(output)
                 }
             }
