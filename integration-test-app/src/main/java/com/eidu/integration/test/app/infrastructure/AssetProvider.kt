@@ -64,7 +64,7 @@ class AssetProvider : ContentProvider() {
         filePath: String,
         learningPackage: LearningPackage
     ): File? =
-        learningPackage.readAsset(filePath)?.use { input ->
+        learningPackage.assets[filePath]?.read()?.use { input ->
             tempAssetFile(learningAppPackage, filePath).also {
                 it.outputStream().use { output ->
                     input.copyTo(output)

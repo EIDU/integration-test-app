@@ -115,7 +115,7 @@ dependencies {
 
     // EIDU dependencies
     implementation("com.eidu:integration-library:1.8.0")
-    implementation("com.eidu:learning-packages:1.0.6")
+    implementation("com.eidu:learning-packages:1.0.7")
 
     // Test
     testImplementation("junit:junit:4.13.2")
