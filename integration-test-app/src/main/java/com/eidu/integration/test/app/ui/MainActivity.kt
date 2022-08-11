@@ -202,12 +202,11 @@ class MainActivity : ComponentActivity() {
     private fun receiveUnitLaunchRequest(intent: Intent) {
         val uri = intent.data
         val path = uri?.path
-        learningAppViewModel.requestedUnitLaunch.postValue(
+        learningAppViewModel.requestedUnitLaunch.value =
             if (path != null && uri.authority == "launch-unit")
                 path.trim('/').split(':', limit = 2)[1]
             else
                 null
-        )
     }
 
     private fun handleLearningAppResult(activityResult: ActivityResult) {
