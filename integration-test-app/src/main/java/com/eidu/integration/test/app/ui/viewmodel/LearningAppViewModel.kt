@@ -11,6 +11,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import com.eidu.content.learningpackages.domain.LearningUnit
 import com.eidu.integration.RunLearningUnitRequest
 import com.eidu.integration.RunLearningUnitResult
@@ -36,6 +37,8 @@ class LearningAppViewModel @Inject constructor(
 
     private val _importStatus = MutableLiveData<Result<Unit>>()
     val importStatus: LiveData<Result<Unit>> = _importStatus
+
+    val requestedUnitLaunch = MutableLiveData<String?>()
 
     fun dismissStatus() {
         _importStatus.postValue(null)
@@ -148,7 +151,7 @@ class LearningAppViewModel @Inject constructor(
             learningApp,
             learningUnit
         )
-        navController.navigate("learning-apps/${learningApp.packageName}/result")
+        navController.navigate("learning-apps/${learningApp.packageName}/result", NavOptions.Builder().setLaunchSingleTop(true).build())
         try {
             learningAppLauncher.launch(launchIntent)
         } catch (e: Exception) {

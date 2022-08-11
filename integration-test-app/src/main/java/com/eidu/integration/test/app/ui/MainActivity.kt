@@ -16,6 +16,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
@@ -52,10 +53,13 @@ class MainActivity : ComponentActivity() {
         val clipboardService = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
         val copyToClipboardToast = Toast.makeText(this, "Copied to clipboard!", Toast.LENGTH_SHORT)
 
+        receiveUnitLaunchRequest(intent)
+
         setContent {
             val navController = rememberNavController()
 
-            handleLaunchUnitLink(navController, learningAppLauncher)
+            val requestedUnitLaunch by learningAppViewModel.requestedUnitLaunch.observeAsState()
+            LaunchRequestedUnit(requestedUnitLaunch, learningAppLauncher, navController)
 
             val goBack: () -> Unit = { navController.navigateUp() }
             EIDUIntegrationTestAppTheme {
@@ -173,16 +177,37 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun handleLaunchUnitLink(
-        navController: NavHostController,
-        learningAppLauncher: ActivityResultLauncher<Intent>
+    @Composable
+    private fun LaunchRequestedUnit(
+        requestedUnitLaunch: String?,
+        learningAppLauncher: ActivityResultLauncher<Intent>,
+        navController: NavHostController
     ) {
+        LaunchedEffect(requestedUnitLaunch) {
+            requestedUnitLaunch?.let {
+                learningAppViewModel.launchLearningAppUnit(
+                    it,
+                    learningAppLauncher,
+                    navController
+                )
+            }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        receiveUnitLaunchRequest(intent)
+    }
+
+    private fun receiveUnitLaunchRequest(intent: Intent) {
         val uri = intent.data
         val path = uri?.path
-        if (path != null && uri.authority == "launch-unit") {
-            val unitId = path.trim('/').split(':', limit = 2)[1]
-            learningAppViewModel.launchLearningAppUnit(unitId, learningAppLauncher, navController)
-        }
+        learningAppViewModel.requestedUnitLaunch.postValue(
+            if (path != null && uri.authority == "launch-unit")
+                path.trim('/').split(':', limit = 2)[1]
+            else
+                null
+        )
     }
 
     private fun handleLearningAppResult(activityResult: ActivityResult) {
