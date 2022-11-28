@@ -7,7 +7,7 @@ object Apps {
 }
 
 object Versions {
-    const val androidGradle = "7.2.1"
+    const val androidGradle = "7.3.1"
     const val kotlin = "1.7.0"
     const val compose = "1.1.1"
     const val objectBox = "3.2.0"
