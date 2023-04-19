@@ -184,6 +184,9 @@ class LearningAppViewModel @Inject constructor(
     private fun clearLearningAppResult() {
         _learningAppResult.postValue(Result.Loading)
     }
+
+    suspend fun getUnitIcon(packageName: String, unit: LearningUnit) =
+        learningPackageService.getIcon(packageName, unit)
 }
 
 sealed class Result<out T> {

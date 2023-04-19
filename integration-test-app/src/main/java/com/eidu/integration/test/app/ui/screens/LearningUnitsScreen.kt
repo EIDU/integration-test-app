@@ -1,9 +1,12 @@
 package com.eidu.integration.test.app.ui.screens
 
+import android.graphics.Bitmap
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,12 +21,14 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.WarningAmber
+import androidx.compose.material.icons.outlined.Gamepad
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.eidu.content.learningpackages.domain.LearningUnit
@@ -32,12 +37,14 @@ import com.eidu.integration.test.app.ui.shared.EiduScaffold
 import com.eidu.integration.test.app.ui.shared.LoadingIndicator
 import com.eidu.integration.test.app.ui.shared.SAMPLE_APP_1
 import com.eidu.integration.test.app.ui.viewmodel.Result
+import kotlinx.coroutines.runBlocking
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun LearningUnitsScreen(
     learningApp: LearningApp,
     learningUnits: Result<List<LearningUnit>>,
+    getUnitIcon: suspend (LearningUnit) -> Bitmap?,
     runUnit: (LearningUnit) -> Unit,
     goBack: () -> Unit
 ) {
@@ -51,7 +58,11 @@ fun LearningUnitsScreen(
                     learningUnits.result.zip(0..Int.MAX_VALUE),
                     { it.first.toString() }
                 ) { (unit, index) ->
-                    LearningUnitRow(index = index, learningUnit = unit) { runUnit(unit) }
+                    LearningUnitRow(
+                        index = index,
+                        learningUnit = unit,
+                        runBlocking { getUnitIcon(unit) }
+                    ) { runUnit(unit) }
                     Divider()
                 }
             }
@@ -91,9 +102,13 @@ fun LearningUnitsScreen(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun LearningUnitRow(index: Int, learningUnit: LearningUnit, runUnit: () -> Unit) {
+fun LearningUnitRow(index: Int, learningUnit: LearningUnit, icon: Bitmap?, runUnit: () -> Unit) {
     ListItem(
         Modifier.clickable { runUnit() },
+        icon = {
+            icon?.asImageBitmap()?.let { Image(it, "Unit icon", Modifier.height(40.dp)) }
+                ?: Icon(Icons.Outlined.Gamepad, "No unit icon", Modifier.height(40.dp))
+        },
         text = { Text("$index: " + learningUnit.id) },
         secondaryText = {
             Row {
@@ -136,25 +151,25 @@ private fun RunManualContentUnit(
 @Preview(showBackground = true)
 @Composable
 private fun LearningUnitListPreview() {
-    LearningUnitsScreen(SAMPLE_APP_1, Result.Success(sampleLearningUnits()), {}, {})
+    LearningUnitsScreen(SAMPLE_APP_1, Result.Success(sampleLearningUnits()), { null }, {}, {})
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun LearningUnitListLoadingPreview() {
-    LearningUnitsScreen(SAMPLE_APP_1, Result.Loading, {}, {})
+    LearningUnitsScreen(SAMPLE_APP_1, Result.Loading, { null }, {}, {})
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun LearningUnitListNotFoundPreview() {
-    LearningUnitsScreen(SAMPLE_APP_1, Result.NotFound, {}, {})
+    LearningUnitsScreen(SAMPLE_APP_1, Result.NotFound, { null }, {}, {})
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun LearningUnitListErrorPreview() {
-    LearningUnitsScreen(SAMPLE_APP_1, Result.Error("Error"), {}, {})
+    LearningUnitsScreen(SAMPLE_APP_1, Result.Error("Error"), { null }, {}, {})
 }
 
 private fun sampleLearningUnits(): List<LearningUnit> = (1..20).map {

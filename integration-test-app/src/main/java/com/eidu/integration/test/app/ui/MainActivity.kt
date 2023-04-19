@@ -100,6 +100,7 @@ class MainActivity : ComponentActivity() {
                                     LearningUnitsScreen(
                                         learningApp = learningApp,
                                         learningUnits = unitLoadingState,
+                                        { unit -> learningAppViewModel.getUnitIcon(learningApp.packageName, unit) },
                                         { unit ->
                                             learningAppViewModel.launchLearningAppUnit(
                                                 learningApp,

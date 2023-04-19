@@ -1,9 +1,12 @@
 package com.eidu.integration.test.app.infrastructure
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import com.eidu.content.learningpackages.LearningPackage
+import com.eidu.content.learningpackages.domain.LearningUnit
 import com.eidu.integration.test.app.model.LearningApp
 import com.eidu.integration.test.app.ui.viewmodel.Result
 import com.eidu.integration.test.app.util.AsyncCache
@@ -27,6 +30,11 @@ class LearningPackageService @Inject constructor(
 
     suspend fun getLearningPackage(learningAppPackage: String): LearningPackage =
         learningPackageCache.get(learningAppPackage)
+
+    suspend fun getIcon(learningAppPackage: String, unit: LearningUnit): Bitmap? =
+        getLearningPackage(learningAppPackage).icons[unit.icon]?.read()?.let {
+            BitmapFactory.decodeStream(it)
+        }
 
     fun putLearningPackage(uri: Uri): Result<Unit> = try {
         val tempFile = context.cacheDir.resolve("import.zip").also {
