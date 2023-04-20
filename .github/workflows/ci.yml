@@ -4,7 +4,7 @@ on: push
 
 jobs:
   Build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     env:
       READPACKAGES_GITHUB_USER: ${{ secrets.GH_READPACKAGES_USER }}
