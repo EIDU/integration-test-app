@@ -22,7 +22,8 @@ fun LearningAppResultScreen(
     learningAppResult: Result<RunLearningUnitResult>,
     copyToClipboard: (String, String) -> Unit,
     goToEditScreen: () -> Unit,
-    goBack: () -> Unit
+    goBack: () -> Unit,
+    finish: () -> Unit
 ) {
     EiduScaffold(
         title = { Text("Learning App Result") },
@@ -30,21 +31,7 @@ fun LearningAppResultScreen(
     ) {
         when (learningAppResult) {
             is Result.Success ->
-                with(learningAppResult.result) {
-                    ResultFields(
-                        fields = listOf(
-                            "Result" to resultType.toString(),
-                            "Score" to "$score",
-                            "Foreground duration" to "$foregroundDurationInMs ms",
-                            "Additional data" to "$additionalData",
-                            "Error Details" to (if (resultType == RunLearningUnitResult.ResultType.Error) "$errorDetails" else null)
-                        ) + (
-                            items?.mapIndexed { index, item -> "Item $index" to item.toJson().toString(2) }
-                                ?: listOf("Items" to "No item list available.")
-                            ).ifEmpty { listOf("Items" to "Item list is empty.") },
-                        copyToClipboard
-                    )
-                }
+                finish()
             is Result.Loading ->
                 LoadingIndicator("Loading package. This may take a few minutes.")
             is Result.Error ->
@@ -98,6 +85,7 @@ private fun LearningAppResultScreenPreview() {
         ),
         { _, _ -> },
         {},
+        {},
         {}
     )
 }
@@ -116,6 +104,7 @@ private fun LearningAppResultScreenWithoutItemListPreview() {
         ),
         { _, _ -> },
         {},
+        {},
         {}
     )
 }
@@ -133,6 +122,7 @@ private fun LearningAppResultScreenWithEmptyItemListPreview() {
             )
         ),
         { _, _ -> },
+        {},
         {},
         {}
     )

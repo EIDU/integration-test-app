@@ -203,4 +203,3 @@ val <T> Result<T>.successValue get() = when (this) {
     Result.NotFound -> null
     is Result.Success -> result
 }
-

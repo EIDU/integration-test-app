@@ -37,18 +37,21 @@ import com.eidu.integration.test.app.ui.shared.EiduScaffold
 import com.eidu.integration.test.app.ui.shared.LoadingIndicator
 import com.eidu.integration.test.app.ui.shared.SAMPLE_APP_1
 import com.eidu.integration.test.app.ui.viewmodel.Result
+import com.eidu.integration.test.app.ui.viewmodel.successValue
 import kotlinx.coroutines.runBlocking
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun LearningUnitsScreen(
+    initialUnitExecuted: Boolean,
     learningApp: LearningApp,
     learningUnits: Result<List<LearningUnit>>,
     getUnitIcon: suspend (LearningUnit) -> Bitmap?,
     runUnit: (LearningUnit) -> Unit,
     goBack: () -> Unit
 ) {
-    EiduScaffold(
+    if (!initialUnitExecuted) learningUnits.successValue?.singleOrNull()?.let(runUnit)
+    else EiduScaffold(
         title = { Text(text = "${learningApp.name} Units") },
         goBack = goBack
     ) {
@@ -151,25 +154,25 @@ private fun RunManualContentUnit(
 @Preview(showBackground = true)
 @Composable
 private fun LearningUnitListPreview() {
-    LearningUnitsScreen(SAMPLE_APP_1, Result.Success(sampleLearningUnits()), { null }, {}, {})
+    LearningUnitsScreen(true, SAMPLE_APP_1, Result.Success(sampleLearningUnits()), { null }, {}, {})
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun LearningUnitListLoadingPreview() {
-    LearningUnitsScreen(SAMPLE_APP_1, Result.Loading, { null }, {}, {})
+    LearningUnitsScreen(true, SAMPLE_APP_1, Result.Loading, { null }, {}, {})
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun LearningUnitListNotFoundPreview() {
-    LearningUnitsScreen(SAMPLE_APP_1, Result.NotFound, { null }, {}, {})
+    LearningUnitsScreen(true, SAMPLE_APP_1, Result.NotFound, { null }, {}, {})
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun LearningUnitListErrorPreview() {
-    LearningUnitsScreen(SAMPLE_APP_1, Result.Error("Error"), { null }, {}, {})
+    LearningUnitsScreen(true, SAMPLE_APP_1, Result.Error("Error"), { null }, {}, {})
 }
 
 private fun sampleLearningUnits(): List<LearningUnit> = (1..20).map {

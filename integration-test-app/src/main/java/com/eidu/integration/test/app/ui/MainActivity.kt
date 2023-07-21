@@ -61,6 +61,8 @@ class MainActivity : ComponentActivity() {
             val requestedUnitLaunch by learningAppViewModel.requestedUnitLaunch.observeAsState()
             LaunchRequestedUnit(requestedUnitLaunch, learningAppLauncher, navController)
 
+            val initialUnitExecuted by learningAppViewModel.initialUnitExecuted.observeAsState(false)
+
             val goBack: () -> Unit = { navController.navigateUp() }
             EIDUIntegrationTestAppTheme {
                 Surface(color = MaterialTheme.colors.background) {
@@ -98,10 +100,12 @@ class MainActivity : ComponentActivity() {
                                     }.observeAsState(initial = Result.Loading)
 
                                     LearningUnitsScreen(
+                                        initialUnitExecuted = initialUnitExecuted,
                                         learningApp = learningApp,
                                         learningUnits = unitLoadingState,
                                         { unit -> learningAppViewModel.getUnitIcon(learningApp.packageName, unit) },
                                         { unit ->
+                                            learningAppViewModel.initialUnitExecuted.postValue(true)
                                             learningAppViewModel.launchLearningAppUnit(
                                                 learningApp,
                                                 unit,
@@ -137,7 +141,11 @@ class MainActivity : ComponentActivity() {
                                         {
                                             navController.navigate("learning-apps/${app.result.packageName}/edit")
                                         },
-                                        goBack
+                                        goBack,
+                                        {
+                                            learningAppViewModel.requestedUnitLaunch.postValue(null)
+                                            finish()
+                                        }
                                     )
                                 }
                                 is Result.Error -> {}
