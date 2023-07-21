@@ -39,6 +39,7 @@ class LearningAppViewModel @Inject constructor(
     val importStatus: LiveData<Result<Unit>> = _importStatus
 
     val requestedUnitLaunch = MutableLiveData<String?>()
+    val initialUnitExecuted = MutableLiveData(false)
 
     fun dismissStatus() {
         _importStatus.postValue(null)
@@ -195,3 +196,11 @@ sealed class Result<out T> {
     object NotFound : Result<Nothing>()
     data class Error(val reason: String) : Result<Nothing>()
 }
+
+val <T> Result<T>.successValue get() = when (this) {
+    is Result.Error,
+    Result.Loading,
+    Result.NotFound -> null
+    is Result.Success -> result
+}
+
