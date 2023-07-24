@@ -71,6 +71,11 @@ class MainActivity : ComponentActivity() {
                             val learningApps =
                                 learningAppViewModel.getLearningApps().observeAsState(listOf())
 
+                            val learningApp = learningApps.value.singleOrNull()
+                            LaunchedEffect(learningApps.value) {
+                                learningApp?.let { navController.navigate("learning-apps/${it.packageName}/units") }
+                            }
+
                             LearningAppsScreen(
                                 learningApps.value,
                                 learningAppViewModel.importStatus,
