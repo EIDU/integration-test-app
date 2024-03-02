@@ -38,12 +38,11 @@ jobs:
       - name: Lint and test
         run: ./gradlew ktlintCheck ktlintTestSourceSetCheck ktlintAndroidTestSourceSetCheck lintRelease --stacktrace
 
-      - name: Publish test reports
+      - name: Publish reports
         uses: actions/upload-artifact@v1
         with:
           name: test-reports
-          path: app/build/reports/tests
-        if: ${{ failure() }}
+          path: app/build/reports
 
       - name: Build APK
         run: |
@@ -58,19 +57,3 @@ jobs:
         run: |
           aws s3 cp integration-test-app/build/outputs/apk/release/integration-test-app-release.apk "${{ env.S3_BASE_URL }}${{ env.S3_LATEST_OBJECT_PATH }}"
         if: github.ref == 'refs/heads/main'
-
-      - uses: actions/checkout@v2
-        with:
-          repository: EIDU/ci-notify-slack
-          token: ${{ secrets.GH_READPACKAGES_TOKEN }}
-          path: .github/actions/ci-notify-slack
-        if: always()
-
-      - name: "Post Slack message to #build"
-        uses: ./.github/actions/ci-notify-slack
-        with:
-          job-status: ${{ job.status }}
-          webhook: ${{ secrets.SLACK_WEBHOOK_BUILD_CHANNEL }}
-          artifact-urls: >-
-            ["${{ env.S3_HTTP_BASE_URL }}${{ env.S3_CI_OBJECT_PATH }}"]
-        if: always()
