@@ -1,4 +1,3 @@
-import extensions.getLocalProperty
 import extensions.getLocalPropertyOrNull
 import utils.getAppVersion
 import utils.toVersionCode
@@ -78,18 +77,6 @@ android {
 repositories {
     google()
     mavenCentral()
-    maven {
-        name = "GitHubPackages"
-        url = uri("https://maven.pkg.github.com/EIDU/integration-test-app")
-        credentials {
-            username = System.getenv("READPACKAGES_GITHUB_USER")
-                ?: System.getenv("GITHUB_READPACKAGES_USER")
-                ?: getLocalProperty("githubReadPackagesUser")
-            password = System.getenv("READPACKAGES_GITHUB_TOKEN")
-                ?: System.getenv("GITHUB_READPACKAGES_TOKEN")
-                ?: getLocalProperty("githubReadPackagesToken")
-        }
-    }
 }
 
 dependencies {
