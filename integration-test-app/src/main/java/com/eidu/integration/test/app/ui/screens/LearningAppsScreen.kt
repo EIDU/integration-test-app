@@ -52,7 +52,7 @@ import com.eidu.integration.test.app.ui.viewmodel.Result
 @Composable
 fun LearningAppsScreen(
     learningApps: List<LearningApp>,
-    importStatus: LiveData<Result<Unit>>,
+    importStatus: LiveData<Result<Unit>?>,
     dismissStatus: () -> Unit,
     navigateToUnits: (app: LearningApp) -> Unit,
     deleteLearningApp: (app: LearningApp) -> Unit,

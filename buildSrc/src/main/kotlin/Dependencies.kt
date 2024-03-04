@@ -1,17 +1,16 @@
 object Apps {
     const val testApplicationId = "com.eidu.integration.test.app"
-    const val compileSdk = 31
+    const val compileSdk = 34
     const val minSdk = 21
-    const val targetSdk = 31
-    const val buildToolsVersion = "30.0.3"
+    const val targetSdk = 34
+    const val buildToolsVersion = "34.0.0"
 }
 
 object Versions {
-    const val androidGradle = "7.3.1"
-    const val kotlin = "1.7.0"
-    const val compose = "1.1.1"
-    const val objectBox = "3.2.0"
-    const val navigation = "2.5.0"
-    const val ktlintGradle = "10.3.0"
-    const val hilt = "2.42"
+    const val androidGradle = "8.2.2"
+    const val kotlin = "1.9.22"
+    const val compose = "1.6.2"
+    const val objectBox = "3.8.0"
+    const val navigation = "2.7.7"
+    const val hilt = "2.51"
 }

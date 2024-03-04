@@ -1,5 +1,6 @@
 package com.eidu.integration.test.app.ui.shared
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.BottomAppBar
 import androidx.compose.material.Icon
@@ -17,7 +18,7 @@ fun EiduScaffold(
     floatingAction: @Composable () -> Unit = {},
     bottomBarActions: @Composable (RowScope.() -> Unit)? = null,
     goBack: (() -> Unit)? = null,
-    content: @Composable () -> Unit
+    content: @Composable (PaddingValues) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -44,6 +45,6 @@ fun EiduScaffold(
             }
         }
     ) {
-        content()
+        content(it)
     }
 }

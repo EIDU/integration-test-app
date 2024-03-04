@@ -35,8 +35,8 @@ class LearningAppViewModel @Inject constructor(
 
     private val _learningAppResult = MutableLiveData<Result<RunLearningUnitResult>>()
 
-    private val _importStatus = MutableLiveData<Result<Unit>>()
-    val importStatus: LiveData<Result<Unit>> = _importStatus
+    private val _importStatus = MutableLiveData<Result<Unit>?>()
+    val importStatus: LiveData<Result<Unit>?> = _importStatus
 
     val requestedUnitLaunch = MutableLiveData<String?>()
 

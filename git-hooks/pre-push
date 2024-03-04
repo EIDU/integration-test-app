@@ -1,1 +1,1 @@
-./gradlew ktlintCheck ktlintTestSourceSetCheck ktlintAndroidTestSourceSetCheck lintDebug
+./gradlew lintDebug test

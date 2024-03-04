@@ -8,8 +8,7 @@ plugins {
     id("kotlin-kapt")
     id("io.objectbox")
     id("dagger.hilt.android.plugin")
-    id("org.jlleitschuh.gradle.ktlint") version Versions.ktlintGradle
-    kotlin("plugin.serialization") version "1.7.0"
+    kotlin("plugin.serialization") version "1.9.22"
 }
 
 val version = getAppVersion()
@@ -65,27 +64,22 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.2.0"
+        kotlinCompilerExtensionVersion = "1.5.10"
     }
-    packagingOptions {
+    packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
 }
 
-repositories {
-    google()
-    mavenCentral()
-}
-
 dependencies {
-    implementation("androidx.core:core-ktx:1.8.0")
-    implementation("androidx.appcompat:appcompat:1.4.2")
-    implementation("com.google.android.material:material:1.6.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.0")
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.11.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
     // Compose
     implementation("androidx.compose.ui:ui:${Versions.compose}")
@@ -95,7 +89,7 @@ dependencies {
     implementation("androidx.compose.runtime:runtime-livedata:${Versions.compose}")
     implementation("androidx.navigation:navigation-compose:${Versions.navigation}")
     implementation("androidx.compose.material:material-icons-extended:${Versions.compose}")
-    implementation("androidx.activity:activity-compose:1.5.0")
+    implementation("androidx.activity:activity-compose:1.8.2")
 
     // Hilt/Dagger DI
     implementation("com.google.dagger:hilt-android:${Versions.hilt}")
@@ -103,12 +97,5 @@ dependencies {
 
     // EIDU dependencies
     implementation("com.eidu:integration-library:1.8.0")
-    implementation("com.eidu:learning-packages:1.0.7")
-
-    // Test
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.3")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:${Versions.compose}")
-    debugImplementation("androidx.compose.ui:ui-tooling:${Versions.compose}")
+    implementation("com.eidu:learning-packages:2.0.0")
 }

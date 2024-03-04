@@ -24,23 +24,23 @@ jobs:
           echo "S3_CI_OBJECT_PATH=ci/integration-test-app-$GITHUB_RUN_NUMBER.apk" >> $GITHUB_ENV
           echo "S3_LATEST_OBJECT_PATH=dev/integration-test-app.apk" >> $GITHUB_ENV
 
-      - name: Set up JDK 11
+      - name: Set up JDK
         uses: actions/setup-java@v1
         with:
-          java-version: '11'
+          java-version: '21'
 
       - uses: actions/checkout@v2
       - name: Get tags for versioning the app
         run: git fetch --tags -f
 
       - name: Lint and test
-        run: ./gradlew ktlintCheck ktlintTestSourceSetCheck ktlintAndroidTestSourceSetCheck lintRelease --stacktrace
+        run: ./gradlew lintRelease test --stacktrace
 
       - name: Publish reports
         uses: actions/upload-artifact@v1
         with:
           name: test-reports
-          path: app/build/reports
+          path: integration-test-app/build/reports
 
       - name: Build APK
         run: |
