@@ -8,7 +8,8 @@ plugins {
     id("kotlin-kapt")
     id("io.objectbox")
     id("dagger.hilt.android.plugin")
-    kotlin("plugin.serialization") version "1.9.22"
+    kotlin("plugin.serialization") version Versions.kotlin
+    id("org.jetbrains.kotlin.plugin.compose") version Versions.kotlin
 }
 
 val version = getAppVersion()
@@ -63,9 +64,6 @@ android {
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.10"
-    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -74,10 +72,10 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.11.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("com.google.android.material:material:1.12.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.2")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
@@ -89,7 +87,7 @@ dependencies {
     implementation("androidx.compose.runtime:runtime-livedata:${Versions.compose}")
     implementation("androidx.navigation:navigation-compose:${Versions.navigation}")
     implementation("androidx.compose.material:material-icons-extended:${Versions.compose}")
-    implementation("androidx.activity:activity-compose:1.8.2")
+    implementation("androidx.activity:activity-compose:1.9.0")
 
     // Hilt/Dagger DI
     implementation("com.google.dagger:hilt-android:${Versions.hilt}")
