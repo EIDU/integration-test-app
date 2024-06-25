@@ -1,4 +1,7 @@
+import com.github.jk1.license.render.ReportRenderer
 import extensions.getLocalPropertyOrNull
+import licenses.FullJsonReportRenderer
+import org.gradle.configurationcache.extensions.capitalized
 import utils.getAppVersion
 import utils.toVersionCode
 
@@ -10,6 +13,7 @@ plugins {
     id("dagger.hilt.android.plugin")
     kotlin("plugin.serialization") version Versions.kotlin
     id("org.jetbrains.kotlin.plugin.compose") version Versions.kotlin
+    id("com.github.jk1.dependency-license-report")
 }
 
 val version = getAppVersion()
@@ -69,6 +73,26 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    // copy license report to resources
+    applicationVariants.all {
+        val variant = this
+
+        tasks.register<Copy>("copyLicenseReport${variant.name.capitalized()}") {
+            dependsOn("generateLicenseReport")
+            from("$buildDir/reports/dependency-license")
+            include("dependencies.json")
+            into(file("${variant.mergeAssetsProvider.get().outputDir.get()}"))
+        }
+
+        tasks.named("merge${variant.name.capitalized()}Assets") {
+            dependsOn("copyLicenseReport${variant.name.capitalized()}")
+        }
+    }
+}
+
+licenseReport {
+    renderers = arrayOf<ReportRenderer>(FullJsonReportRenderer())
 }
 
 dependencies {
@@ -77,7 +101,7 @@ dependencies {
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.2")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
 
     // Compose
     implementation("androidx.compose.ui:ui:${Versions.compose}")

@@ -22,16 +22,21 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.eidu.integration.test.app.model.LearningApp
 import com.eidu.integration.test.app.ui.screens.EditLearningAppScreen
 import com.eidu.integration.test.app.ui.screens.LearningAppResultScreen
 import com.eidu.integration.test.app.ui.screens.LearningAppsScreen
 import com.eidu.integration.test.app.ui.screens.LearningUnitsScreen
+import com.eidu.integration.test.app.ui.screens.licenses.LicensesScreen
+import com.eidu.integration.test.app.ui.screens.licenses.LicenseScreen
 import com.eidu.integration.test.app.ui.theme.EIDUIntegrationTestAppTheme
 import com.eidu.integration.test.app.ui.viewmodel.LearningAppViewModel
+import com.eidu.integration.test.app.ui.viewmodel.LicensesViewModel
 import com.eidu.integration.test.app.ui.viewmodel.Result
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -39,6 +44,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val learningAppViewModel: LearningAppViewModel by viewModels()
+    private val licensesViewModel: LicensesViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,11 +79,13 @@ class MainActivity : ComponentActivity() {
                                 learningApps.value,
                                 learningAppViewModel.importStatus,
                                 learningAppViewModel::dismissStatus,
-                                { learningApp -> navController.navigate("learning-apps/${learningApp.packageName}/units") },
-                                { learningApp -> learningAppViewModel.deleteLearningApp(learningApp) },
-                                { learningApp -> navController.navigate("learning-apps/${learningApp.packageName}/edit") },
-                                { packageFilePicker.launch(arrayOf("application/zip")) }
-                            ) { navController.navigate("learning-apps/create") }
+                                navigateToUnits = { learningApp -> navController.navigate("learning-apps/${learningApp.packageName}/units") },
+                                deleteLearningApp = { learningApp -> learningAppViewModel.deleteLearningApp(learningApp) },
+                                editLearningApp = { learningApp -> navController.navigate("learning-apps/${learningApp.packageName}/edit") },
+                                openFilePicker = { packageFilePicker.launch(arrayOf("application/zip")) },
+                                addLearningApp = { navController.navigate("learning-apps/create") },
+                                navigateToOpenSourceLicenses = { navController.navigate("licenses") }
+                            )
                         }
                         composable("learning-apps/{app}/units") { backStackEntry ->
                             when (val app: Result<LearningApp> = getAppNameState(backStackEntry)) {
@@ -170,6 +178,17 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
                                 is Result.Error -> {}
+                            }
+                        }
+
+                        composable("licenses") { LicensesScreen(goBack, navController, licensesViewModel) }
+
+                        composable(
+                            "licenses/{index}",
+                            arguments = listOf(navArgument("index") { type = NavType.IntType })
+                        ) { backStackEntry ->
+                            LicenseScreen(backStackEntry, goBack, licensesViewModel) {
+                                startActivity(Intent(Intent.ACTION_VIEW, it))
                             }
                         }
                     }
