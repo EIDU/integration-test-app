@@ -33,6 +33,7 @@ import com.eidu.integration.test.app.ui.screens.LearningUnitsScreen
 import com.eidu.integration.test.app.ui.theme.EIDUIntegrationTestAppTheme
 import com.eidu.integration.test.app.ui.viewmodel.LearningAppViewModel
 import com.eidu.integration.test.app.ui.viewmodel.Result
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -73,11 +74,13 @@ class MainActivity : ComponentActivity() {
                                 learningApps.value,
                                 learningAppViewModel.importStatus,
                                 learningAppViewModel::dismissStatus,
-                                { learningApp -> navController.navigate("learning-apps/${learningApp.packageName}/units") },
-                                { learningApp -> learningAppViewModel.deleteLearningApp(learningApp) },
-                                { learningApp -> navController.navigate("learning-apps/${learningApp.packageName}/edit") },
-                                { packageFilePicker.launch(arrayOf("application/zip")) }
-                            ) { navController.navigate("learning-apps/create") }
+                                navigateToUnits = { learningApp -> navController.navigate("learning-apps/${learningApp.packageName}/units") },
+                                deleteLearningApp = { learningApp -> learningAppViewModel.deleteLearningApp(learningApp) },
+                                editLearningApp = { learningApp -> navController.navigate("learning-apps/${learningApp.packageName}/edit") },
+                                openFilePicker = { packageFilePicker.launch(arrayOf("application/zip")) },
+                                addLearningApp = { navController.navigate("learning-apps/create") },
+                                navigateToOpenSourceLicenses = { startActivity(Intent(this@MainActivity, OssLicensesMenuActivity::class.java)) }
+                            )
                         }
                         composable("learning-apps/{app}/units") { backStackEntry ->
                             when (val app: Result<LearningApp> = getAppNameState(backStackEntry)) {

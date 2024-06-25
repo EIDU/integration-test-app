@@ -20,6 +20,7 @@ import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.ListItem
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
@@ -60,7 +61,8 @@ fun LearningAppsScreen(
     deleteLearningApp: (app: LearningApp) -> Unit,
     editLearningApp: (app: LearningApp) -> Unit,
     openFilePicker: () -> Unit,
-    addLearningApp: () -> Unit
+    addLearningApp: () -> Unit,
+    navigateToOpenSourceLicenses: () -> Unit
 ) {
     val currentStatus = importStatus.observeAsState().value
 
@@ -129,14 +131,24 @@ fun LearningAppsScreen(
                 ListItem(
                     modifier = Modifier.padding(vertical = 8.dp),
                     text = {
-                        Text(
-                            "Upload your learning package to this device (e.g. `adb push learning-package.zip" +
-                                " /sdcard/`) and add it via 'Add learning package', or" +
-                                " add an app manually if you don't have a learning package yet.\n\n" +
-                                "Note: You need to install the APK yourself!",
-                            fontSize = 12.sp,
-                            lineHeight = 18.sp
-                        )
+                        Column() {
+                            Text(
+                                "Upload your learning package to this device (e.g. `adb push learning-package.zip" +
+                                        " /sdcard/`) and add it via 'Add learning package', or" +
+                                        " add an app manually if you don't have a learning package yet.\n\n" +
+                                        "Note: You need to install the APK yourself!",
+                                fontSize = 12.sp,
+                                lineHeight = 18.sp
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "View open source licenses",
+                                fontSize = 12.sp,
+                                lineHeight = 18.sp,
+                                color = MaterialTheme.colors.primary,
+                                modifier = Modifier.clickable { navigateToOpenSourceLicenses() }
+                            )
+                        }
                     },
                     icon = { Icon(Icons.Default.Info, "How to add a learning package") }
                 )
@@ -223,8 +235,10 @@ private fun LearningAppScreenPreview() {
         navigateToUnits = {},
         deleteLearningApp = {},
         editLearningApp = {},
-        openFilePicker = {}
-    ) {}
+        openFilePicker = {},
+        addLearningApp = {},
+        navigateToOpenSourceLicenses = {}
+    )
 }
 
 @Preview(showBackground = true, device = Devices.NEXUS_5)
@@ -237,8 +251,10 @@ private fun LearningAppScreenPreviewLoading() {
         navigateToUnits = {},
         deleteLearningApp = {},
         editLearningApp = {},
-        openFilePicker = {}
-    ) {}
+        openFilePicker = {},
+        addLearningApp = {},
+        navigateToOpenSourceLicenses = {}
+    )
 }
 
 @Preview(showBackground = true, device = Devices.NEXUS_5)
@@ -251,8 +267,10 @@ private fun LearningAppScreenPreviewSuccess() {
         navigateToUnits = {},
         deleteLearningApp = {},
         editLearningApp = {},
-        openFilePicker = {}
-    ) {}
+        openFilePicker = {},
+        addLearningApp = {},
+        navigateToOpenSourceLicenses = {}
+    )
 }
 
 @Preview(showBackground = true, device = Devices.NEXUS_5)
@@ -265,6 +283,8 @@ private fun LearningAppScreenPreviewError() {
         navigateToUnits = {},
         deleteLearningApp = {},
         editLearningApp = {},
-        openFilePicker = {}
-    ) {}
+        openFilePicker = {},
+        addLearningApp = {},
+        navigateToOpenSourceLicenses = {}
+    )
 }

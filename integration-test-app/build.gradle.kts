@@ -10,6 +10,7 @@ plugins {
     id("dagger.hilt.android.plugin")
     kotlin("plugin.serialization") version Versions.kotlin
     id("org.jetbrains.kotlin.plugin.compose") version Versions.kotlin
+    id("com.google.android.gms.oss-licenses-plugin")
 }
 
 val version = getAppVersion()
@@ -78,6 +79,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.2")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation("com.google.android.gms:play-services-oss-licenses:17.1.0")
 
     // Compose
     implementation("androidx.compose.ui:ui:${Versions.compose}")
@@ -88,6 +90,7 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:${Versions.navigation}")
     implementation("androidx.compose.material:material-icons-extended:${Versions.compose}")
     implementation("androidx.activity:activity-compose:1.9.0")
+    debugImplementation("androidx.compose.ui:ui-tooling:${Versions.compose}")
 
     // Hilt/Dagger DI
     implementation("com.google.dagger:hilt-android:${Versions.hilt}")

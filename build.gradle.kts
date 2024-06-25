@@ -13,6 +13,7 @@ buildscript {
         classpath("io.objectbox:objectbox-gradle-plugin:${Versions.objectBox}")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}")
         classpath("com.google.dagger:hilt-android-gradle-plugin:${Versions.hilt}")
+        classpath("com.google.android.gms:oss-licenses-plugin:0.10.6")
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
