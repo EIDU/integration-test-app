@@ -2,7 +2,7 @@
 
 Use this app to test your implementation of the EIDU learning app interface.
 
-Pleas consult the [official documentation](https://dev.eidu.com/content/testing-your-apps-integration)
+Please consult the [official documentation](https://dev.eidu.com/content/testing-your-apps-integration)
 for detailed instructions and to download the latest readily built APK of this app.
 
 ## Support
