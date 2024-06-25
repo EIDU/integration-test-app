@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.AlertDialog
@@ -39,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.eidu.integration.test.app.model.LearningApp
@@ -125,12 +127,15 @@ fun LearningAppsScreen(
                 )
             null -> Column {
                 ListItem(
+                    modifier = Modifier.padding(vertical = 8.dp),
                     text = {
                         Text(
                             "Upload your learning package to this device (e.g. `adb push learning-package.zip" +
                                 " /sdcard/`) and add it via 'Add learning package', or" +
                                 " add an app manually if you don't have a learning package yet.\n\n" +
-                                "Note: You need to install the APK yourself!"
+                                "Note: You need to install the APK yourself!",
+                            fontSize = 12.sp,
+                            lineHeight = 18.sp
                         )
                     },
                     icon = { Icon(Icons.Default.Info, "How to add a learning package") }
