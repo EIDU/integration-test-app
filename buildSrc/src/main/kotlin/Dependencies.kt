@@ -8,9 +8,9 @@ object Apps {
 
 object Versions {
     const val androidGradle = "8.2.2"
-    const val kotlin = "1.9.22"
-    const val compose = "1.6.2"
+    const val kotlin = "2.0.0"
+    const val compose = "1.6.8"
     const val objectBox = "3.8.0"
     const val navigation = "2.7.7"
-    const val hilt = "2.51"
+    const val hilt = "2.51.1"
 }
