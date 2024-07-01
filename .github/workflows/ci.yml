@@ -33,13 +33,13 @@ jobs:
       - name: Get tags for versioning the app
         run: git fetch --tags -f
 
-      - name: Lint and test
-        run: ./gradlew lintRelease test --stacktrace
+      - name: Lint and check
+        run: ./gradlew lintRelease check --stacktrace
 
       - name: Publish reports
         uses: actions/upload-artifact@v1
         with:
-          name: test-reports
+          name: reports
           path: integration-test-app/build/reports
 
       - name: Build APK

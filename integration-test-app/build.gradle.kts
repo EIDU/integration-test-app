@@ -93,6 +93,17 @@ android {
 
 licenseReport {
     renderers = arrayOf<ReportRenderer>(FullJsonReportRenderer())
+    allowedLicensesFile = File("$projectDir/allowed-licenses.json")
+}
+
+tasks.named("checkLicense") {
+    // The checkLicense task does not declare this input itself, so we do it here. This ensures
+    // that a modification of the file causes the checkLicense task to be re-evaluated.
+    inputs.file("$projectDir/allowed-licenses.json")
+}
+
+tasks.named("check") {
+    dependsOn("checkLicense")
 }
 
 dependencies {

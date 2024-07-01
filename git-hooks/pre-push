@@ -1,1 +1,1 @@
-./gradlew lintDebug test
+./gradlew lintDebug check
