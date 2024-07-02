@@ -9,6 +9,11 @@ for detailed instructions and to download the latest readily built APK of this a
 
 Please contact EIDU at [dev@eidu.com](mailto:dev@eidu.com) if you need help.
 
+## Contributing
+
+We are excited about your contributions. See
+[our current contribution guidelines](https://dev.eidu.com/contributing/overview) to get started.
+
 ## License
 
 This app is published under the
