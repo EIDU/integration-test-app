@@ -27,6 +27,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.eidu.integration.test.app.R
 import com.eidu.integration.test.app.model.LearningApp
 import com.eidu.integration.test.app.ui.screens.EditLearningAppScreen
 import com.eidu.integration.test.app.ui.screens.LearningAppResultScreen
@@ -48,6 +49,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        setTheme(R.style.Theme_EIDUIntegrationTestApp)
+
         val learningAppLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult(),
             ::handleLearningAppResult
